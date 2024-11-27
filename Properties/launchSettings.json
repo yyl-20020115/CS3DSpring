@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CSWall": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
