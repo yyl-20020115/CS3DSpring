@@ -176,7 +176,7 @@ public static class Spring
     }
 
     public static ModelVisual3D BuildDonutSpringModelVisual3D(
-    double GR = 250, int Coils = 24,  double R = 50, int Segments = 360, double r = 10, Color? light = null, Brush? brush = null)
+    double G = 250, int Coils = 24, double R = 50, int Segments = 360, double r = 10, Color? light = null, Brush? brush = null)
     {
         brush ??= Brushes.Green;
         var model = new ModelVisual3D() { Content = new Model3DGroup() };
@@ -197,7 +197,7 @@ public static class Spring
         var material = new DiffuseMaterial(brush);
 
         var delta_angle = _2PI / Segments;
-        var delta_yeta = _2PI/ Coils;
+        var delta_yeta = _2PI / Coils;
         var yeta = 0.0;
 
         for (int c = 0; c < Coils; c++)
@@ -208,11 +208,10 @@ public static class Spring
                 var phi = 0.0;
                 for (int j = 0; j < Segments; j++)
                 {
-                    //TODO:
                     Positions.Add(new
-                        ((GR + R * Math.Cos(theta)) * Math.Cos(yeta),
-                         (GR + R * Math.Cos(theta)) * Math.Sin(yeta),
-                         0 + r * Math.Sin(phi)
+                        (((G + R * Math.Cos(yeta)) * Math.Cos(yeta) + r * Math.Cos(theta)) * Math.Cos(phi),
+                         ((G + R * Math.Cos(yeta)) * Math.Cos(yeta) + r * Math.Cos(theta)) * Math.Sin(phi),
+                         ((G + R * Math.Cos(yeta)) * Math.Cos(theta)) * Math.Sin(phi)
                         ));
 
                     phi += delta_angle;
@@ -221,7 +220,7 @@ public static class Spring
             }
             yeta += delta_yeta;
         }
-        //可以闭合
+        //Close curve
         for (int current_layer = 0; current_layer < Segments * Coils; current_layer++)
         {
             int next_layer = (current_layer + 1) % (Segments * Coils);
