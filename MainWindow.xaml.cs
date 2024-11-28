@@ -1,12 +1,9 @@
-﻿using System.IO;
-using System.Timers;
-using System.Drawing;
+﻿using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
 
 namespace CS3DSpring;
 
@@ -34,7 +31,7 @@ public partial class MainWindow : Window
         };
         viewPort.Camera = Camera;
 
-        BuildModel(Spring.BuildDonutModelVisual3D(new (0, 0, 0)));
+        BuildModel(Spring.BuildSpringModelVisual3D());
     }
 
     private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
