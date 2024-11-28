@@ -4,7 +4,7 @@
         MouseMove="Window_MouseMove" KeyDown="Window_KeyDown"
         WindowStartupLocation="CenterScreen"
         Title="CS3DSpring" Height="440" Width="640">
-    <Grid x:Name="lay" Background="Azure"  MouseWheel="VP_MouseWheel" AllowDrop="true" Drop="Grid_Drop">
+    <Grid x:Name="lay" Background="Azure"  MouseWheel="VP_MouseWheel" AllowDrop="true">
 
         <Viewport3D x:Name="viewPort"           
                     MouseLeftButtonDown="Vp_MouseLeftButtonDown" Margin="0,31,0.4,-0.2">

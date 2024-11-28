@@ -14,15 +14,10 @@ public partial class MainWindow : Window
     private const double MouseDeltaFactor = 2;
 
     private readonly PerspectiveCamera Camera;
-    private readonly Timer timer = new()
-    {
-        Interval = 1000
-    };
     public MainWindow()
     {
 
         InitializeComponent();
-        this.timer.Elapsed += Timer_Elapsed;
         Camera = new PerspectiveCamera
         {
             Position = new(0, 0, 3000),
@@ -34,19 +29,6 @@ public partial class MainWindow : Window
         BuildModel(Spring.BuildSpringModelVisual3D());
     }
 
-    private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
-    {
-
-    }
-
-    private void Grid_Drop(object sender, DragEventArgs e)
-    {
-        var data = e.Data.GetData(DataFormats.FileDrop);
-        if (data is string[] files && files.Length == 1)
-        {
-
-        }
-    }
     public void BuildModel(ModelVisual3D WorldModels)
     {
         //光源
@@ -56,34 +38,34 @@ public partial class MainWindow : Window
         //SpotLight （聚光源）
 
         //下面是调整n的位置，初学者可以先注释掉。
-        var tt = new TranslateTransform3D
-        {
-            OffsetX = 0,
-            OffsetZ = 0,
-            OffsetY = 0
-        };
-        var tr = new RotateTransform3D
-        {
-            Rotation = new AxisAngleRotation3D(new Vector3D(1, 0, 0), 30)
-        };
+        //var tt = new TranslateTransform3D
+        //{
+        //    OffsetX = 0,
+        //    OffsetZ = 0,
+        //    OffsetY = 0
+        //};
+        //var tr = new RotateTransform3D
+        //{
+        //    Rotation = new AxisAngleRotation3D(new Vector3D(1, 0, 0), 30)
+        //};
 
-        var tr2 = new RotateTransform3D
-        {
-            Rotation = new AxisAngleRotation3D(new Vector3D(0, 0, 1), 30)
-        };
+        //var tr2 = new RotateTransform3D
+        //{
+        //    Rotation = new AxisAngleRotation3D(new Vector3D(0, 0, 1), 30)
+        //};
 
-        var ts = new ScaleTransform3D
-        {
-            ScaleX = 1.5,
-            ScaleY = 1.5,
-            ScaleZ = 1.6
-        };
-        var tg = new Transform3DGroup();
-        tg.Children.Add(tr);
-        tg.Children.Add(tr2);
-        tg.Children.Add(tt);
-        tg.Children.Add(ts);
-        WorldModels.Transform = tg;
+        //var ts = new ScaleTransform3D
+        //{
+        //    ScaleX = 1.5,
+        //    ScaleY = 1.5,
+        //    ScaleZ = 1.6
+        //};
+        //var tg = new Transform3DGroup();
+        //tg.Children.Add(tr);
+        //tg.Children.Add(tr2);
+        //tg.Children.Add(tt);
+        //tg.Children.Add(ts);
+        //WorldModels.Transform = tg;
         //将两个模型添加到场景中
         viewPort.Children.Add(WorldModels);
         //添加鼠标事件，用于显示隐藏光晕特效
@@ -164,7 +146,6 @@ public partial class MainWindow : Window
             }
 
             if (mouseLastPosition.Y != newMousePosition.Y)// change position in the horizontal direction
-
             {
                 //进行垂直旋转
                 VerticalTransform(mouseLastPosition.Y > newMousePosition.Y, MouseDeltaFactor);//垂直变换 
@@ -232,11 +213,6 @@ public partial class MainWindow : Window
     }
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.V && Keyboard.IsKeyDown(Key.LeftCtrl))
-        {
-            return;
-        }
-
         var p = Camera.Position;
         var any = false;
         var offset = MouseDeltaFactor;
