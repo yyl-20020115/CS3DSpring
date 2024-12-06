@@ -424,72 +424,12 @@ public static class SpringBuilder
 
     public static void IncrementAngles(AxisAngleRotation3D[] rotations, double[] deltas)
     {
-        for (var i = 0; i < Math.Min(rotations.Length,deltas.Length); i++)
+        for (var i = 0; i < Math.Min(rotations.Length, deltas.Length); i++)
             rotations[i].Angle += deltas[i];
     }
 
 
-    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D(double GR = 1000, int GR_rings = 24, double SR = 200, int SR_rings = 48, double R = 50, int R_rings = 120, double r = 10, int splits = 30)
-    {
-        var Geometry = new MeshGeometry3D();
-
-        var R_angle_step = 360.0 / R_rings;
-        var SR_R_step_angle = 360.0 / (R_rings * SR_rings);
-        var GR_SR_R_sep_angle = 360.0 / (R_rings * SR_rings * GR_rings);
-
-
-        var transform_group = new Transform3DGroup();
-
-
-        var R_rotation = new AxisAngleRotation3D(y_axis, 0);
-        var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
-        var R_translate_transform = new TranslateTransform3D(R, 0, 0);
-
-        var SR_rotation = new AxisAngleRotation3D(z_axis, 0);
-        var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
-        var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
-
-        var GR_rotation = new AxisAngleRotation3D(x_axis, 0);
-        var GR_rotation_transform = new RotateTransform3D(GR_rotation, origin);
-        var GR_translate_transform = new TranslateTransform3D(0, GR, 0);
-
-
-        //定位点的操作是先局部后整体先移动后转动
-        transform_group.Children.Add(R_translate_transform);
-        transform_group.Children.Add(R_rotation_transform);
-        transform_group.Children.Add(SR_translate_transform);
-        transform_group.Children.Add(SR_rotation_transform);
-
-        transform_group.Children.Add(GR_translate_transform);
-        transform_group.Children.Add(GR_rotation_transform);
-
-
-        for (var k = 0; k < GR_rings; k++)
-        {
-            for (var j = 0; j < SR_rings; j++)
-            {
-                for (var i = 0; i < R_rings; i++)
-                {
-                    var start = transform_group.Transform(origin);
-
-                    R_rotation.Angle += R_angle_step;
-                    SR_rotation.Angle += SR_R_step_angle;
-                    GR_rotation.Angle += GR_SR_R_sep_angle;
-
-                    var end = transform_group.Transform(origin);
-
-                    BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
-                }
-            }
-        }
-
-
-        BuildRingIndices(Geometry.TriangleIndices, GR_rings * SR_rings * R_rings, splits, true, false);
-
-        return Geometry;
-    }
-
-    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D2(double GR = 1000, int GR_rings = 48, double SR = 200, int SR_rings = 48, double R = 50, int R_rings = 120, double r = 4, int splits = 30)
+    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D(double GR = 1000, int GR_rings = 24, double SR = 200, int SR_rings = 24, double R = 50, int R_rings = 30, double r = 4, int splits = 15)
     {
         var Geometry = new MeshGeometry3D();
 
@@ -537,14 +477,83 @@ public static class SpringBuilder
 
             var end = transform_group.Transform(origin);
 
-            BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, 1, 16);
-            //BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
+            //BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, 1, 16);
+            BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 
-        //BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
+        BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
 
         return Geometry;
     }
+
+    public static MeshGeometry3D BuildSuperMultiSpringDonutGeometry3D(double MR = 4000, int MR_rings = 24, double GR = 800, int GR_rings = 24, double SR = 200, int SR_rings = 24, double R = 50, int R_rings = 30, double r = 4, int splits = 15)
+    {
+        var Geometry = new MeshGeometry3D();
+
+        var transform_group = new Transform3DGroup();
+
+        var R_rotation = new AxisAngleRotation3D(y_axis, 0);
+        var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
+        var R_translate_transform = new TranslateTransform3D(0, 0, R);
+
+        var SR_rotation = new AxisAngleRotation3D(z_axis, 0);
+        var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
+        var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
+
+        var GR_rotation = new AxisAngleRotation3D(x_axis, 0);
+        var GR_rotation_transform = new RotateTransform3D(GR_rotation, origin);
+        var GR_translate_transform = new TranslateTransform3D(0, GR, 0);
+
+        var MR_rotation = new AxisAngleRotation3D(y_axis, 0);
+        var MR_rotation_transform = new RotateTransform3D(MR_rotation, origin);
+        var MR_translate_transform = new TranslateTransform3D(0, 0, MR);
+
+
+
+        var final_rotation = new AxisAngleRotation3D(x_axis, 90);
+        var final_rotation_transform = new RotateTransform3D(final_rotation, origin);
+
+        AxisAngleRotation3D[] rotations = [R_rotation, SR_rotation, GR_rotation, MR_rotation];
+
+        //定位点的操作是先局部后整体先移动后转动
+        transform_group.Children.Add(R_translate_transform);
+        transform_group.Children.Add(R_rotation_transform);
+
+        transform_group.Children.Add(SR_translate_transform);
+        transform_group.Children.Add(SR_rotation_transform);
+
+        transform_group.Children.Add(GR_translate_transform);
+        transform_group.Children.Add(GR_rotation_transform);
+
+        transform_group.Children.Add(MR_translate_transform);
+        transform_group.Children.Add(MR_rotation_transform);
+
+
+        transform_group.Children.Add(final_rotation_transform);
+
+
+        int[] limits = [R_rings, SR_rings, GR_rings, MR_rings];
+        var steps = new int[limits.Length];
+        var deltas = BuildDeltas(limits, 360.0);
+        var total = limits.Aggregate(1, (current, before) => current * before);
+
+        for (var n = 0; n < total; n++)
+        {
+            var start = transform_group.Transform(origin);
+
+            IncrementAngles(rotations, deltas);
+
+            var end = transform_group.Transform(origin);
+
+            //BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, 1, 16);
+            BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
+        }
+
+        BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
+
+        return Geometry;
+    }
+
 
 
 

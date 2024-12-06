@@ -16,6 +16,7 @@
             <RadioButton x:Name="SpringDonut" Click="RadioButton_Click">SpringDonut</RadioButton>
             <RadioButton x:Name="SpringDonutWithCubes" Click="RadioButton_Click">SpringDonutWithCubes</RadioButton>
             <RadioButton x:Name="MultiSpringDonut" Click="RadioButton_Click">MultiSpringDonut</RadioButton>
+            <RadioButton x:Name="SuperMultiSpringDonut" Click="RadioButton_Click">SuperMultiSpringDonut</RadioButton>
         </StackPanel>
         <Viewport3D x:Name="viewPort"           
                     MouseLeftButtonDown="Vp_MouseLeftButtonDown" Margin="0,31,0.4,-0.2">

@@ -233,12 +233,18 @@ public partial class MainWindow : Window
         else if(sender == this.SpringDonutWithCubes)
         {
             SetModels(
-                SpringBuilder.BuildSpringDonutWithCubesGeometry3D(1000).Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildSpringDonutWithCubesGeometry3D().Render(Camera.Position, Camera.LookDirection)
             );
         }else if(sender == this.MultiSpringDonut)
         {
             SetModels(
-                SpringBuilder.BuildMultiSpringDonutGeometry3D2(1000).Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildMultiSpringDonutGeometry3D().Render(Camera.Position, Camera.LookDirection)
+            );
+        }
+        else if (sender == this.SuperMultiSpringDonut)
+        {
+            SetModels(
+                SpringBuilder.BuildSuperMultiSpringDonutGeometry3D().Render(Camera.Position, Camera.LookDirection)
             );
         }
     }
