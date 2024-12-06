@@ -15,6 +15,8 @@ public static class SpringBuilder
     public static readonly Vector3D y_axis = new(0, 1, 0);
     public static readonly Vector3D z_axis = new(0, 0, 1);
     public static readonly Vector3D[] axes = [y_axis, z_axis, x_axis];
+    public static readonly Vector3D[] flip_axes = [y_axis, x_axis, z_axis, y_axis];
+
 
     public static double ToDegree(this double radian)
         => radian / Math.PI * 180.0;
@@ -38,14 +40,14 @@ public static class SpringBuilder
                 },
                 new SpotLight(light ?? Colors.White, position??new Point3D(),direction??new Vector3D(),10,5)
             };
-        var material = new DiffuseMaterial(brush) { AmbientColor = light ?? Colors.Gray };
+        var material = new DiffuseMaterial(brush) { AmbientColor = light ?? Colors.Gold };
         collection.Add(new GeometryModel3D(geometry, material));
         group!.Children = collection;
         return model;
 
     }
 
-    public static void BuildDonutGeometry3D(Point3DCollection positions, Point3D center, double R, double r, uint splits)
+    public static void BuildDonut(Point3DCollection positions, Point3D center, double R, double r, uint splits)
     {
         var delta_angle = _2PI / splits;
         var theta = 0.0;
@@ -64,11 +66,11 @@ public static class SpringBuilder
             theta += delta_angle;
         }
     }
-    public static MeshGeometry3D BuildDonutMeshGeometry3D(Point3D center, double R = 50, uint splits = 360, double r = 10)
+    public static MeshGeometry3D BuildDonutGeometry3D(Point3D center, double R = 50, uint splits = 360, double r = 10)
     {
         var Geometry = new MeshGeometry3D();
 
-        BuildDonutGeometry3D(Geometry.Positions, center, R, r, splits);
+        BuildDonut(Geometry.Positions, center, R, r, splits);
         BuildRingIndices(Geometry.TriangleIndices, splits, splits, true);
 
         return Geometry;
@@ -178,6 +180,8 @@ public static class SpringBuilder
         //make double sides
         BuildRingIndices(Geometry.TriangleIndices, coils, splits, false, true);
         BuildRingIndices(Geometry.TriangleIndices, coils, splits, false, false);
+
+
         return Geometry;
     }
 
@@ -258,6 +262,12 @@ public static class SpringBuilder
             angle_round += angle_delta;
         }
     }
+    public static MeshGeometry3D BuildCubeGeometry3D(Point3D center, Vector3D pointing, double radius, double length)
+    {
+        var Geometry = new MeshGeometry3D();
+        BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, center, pointing, radius, length / radius);
+        return Geometry;
+    }
     public static void BuildCubeHelper(Point3DCollection positions, Int32Collection indices, Point3D from, Vector3D pointing, double radius = 1, double ratio = 8)
     {
         pointing.Normalize();
@@ -274,6 +284,8 @@ public static class SpringBuilder
         transform_group.Children.Add(translate_transform);
 
         ratio /= 2.0;
+        var _base = positions.Count;
+
         //  3   2
         //  0   1
         //
@@ -309,7 +321,6 @@ public static class SpringBuilder
             3,0,7, //left
             7,0,4
             ];
-        var _base = positions.Count;
 
         foreach (var index in _indices)
         {
@@ -559,16 +570,37 @@ public static class SpringBuilder
         return Geometry;
     }
 
-    public static Vector3D GenerateOffsetVector(uint i, double r) => (i % 3) switch
+    public static Vector3D GetOffset(uint i, double r, bool flip)
     {
-        0 => new Vector3D(0, 0, r),
-        1 => new Vector3D(r, 0, 0),
-        2 => new Vector3D(0, r, 0),
-        _ => new Vector3D()
-    };
-    public static Transform3D[] GenerateTransforms(uint i, double r, out AxisAngleRotation3D rotation)
-        => [new TranslateTransform3D(GenerateOffsetVector(i, r)),
-            new RotateTransform3D(rotation = new AxisAngleRotation3D(axes[i % 3], 0), origin)];
+        if (flip)
+        {
+            return (i % 4) switch
+            {
+                0 => new Vector3D(0, r, 0),
+                1 => new Vector3D(0, r, 0),
+                2 => new Vector3D(r, 0, 0),
+                3 => new Vector3D(0, 0, r), //4d, no offset
+                _ => new Vector3D()
+            };
+
+        }
+        else
+        {
+            return (i % 3) switch
+            {
+                0 => new Vector3D(0, 0, r),
+                1 => new Vector3D(r, 0, 0),
+                2 => new Vector3D(0, r, 0),
+                _ => new Vector3D()
+            };
+        }
+    }
+    public static Vector3D GetRotationAxis(uint i, bool flip)
+        => flip ? flip_axes[i % 4] : axes[i % 3];
+
+    public static Transform3D[] GenerateTransforms(uint i, double r, bool flip, out AxisAngleRotation3D rotation)
+        => [new TranslateTransform3D(GetOffset(i, r,flip)),
+            new RotateTransform3D(rotation = new AxisAngleRotation3D(GetRotationAxis(i,flip), 0), origin)];
     public static MeshGeometry3D BuildSuperMultiSpringDonutGeometry3D(Point3D center, double MR = 4000, uint MR_rings = 24, double GR = 800, uint GR_rings = 24, double SR = 200, uint SR_rings = 24, double R = 50, uint R_rings = 30, double r = 4, uint splits = 15)
     {
         var Geometry = new MeshGeometry3D();
@@ -634,8 +666,6 @@ public static class SpringBuilder
         return Geometry;
     }
 
-    public static Vector3D GetRotationAxis(uint count)
-        => (count % 4) switch { 0 or 1 => x_axis, 2 => z_axis, _ => y_axis };
 
     public static MeshGeometry3D BuildDepthSpringDonutGeometry3D(Point3D center, double R, uint depth, uint max_rings, double r = 4, uint splits = 12)
     {
@@ -667,7 +697,7 @@ public static class SpringBuilder
 
         for (uint i = 0; i < Rs.Length; i++)
         {
-            var transforms = GenerateTransforms(i, Rs[i].radius, out var rotation);
+            var transforms = GenerateTransforms(i, Rs[i].radius, Rs.Length >= 4, out var rotation);
 
             rotations.Add(rotation);
 
@@ -675,8 +705,6 @@ public static class SpringBuilder
             transform_group.Children.Add(transforms[1]);
         }
 
-
-        transform_group.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(GetRotationAxis((uint)Rs.Length), 90), origin));
         transform_group.Children.Add(new TranslateTransform3D((Vector3D)center));
 
         var limits = Rs.Select(r => r.rings).ToArray();

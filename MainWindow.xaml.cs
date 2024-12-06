@@ -3,6 +3,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Media.Effects;
+using System.Collections.Generic;
 
 namespace CS3DSpring;
 
@@ -28,13 +29,19 @@ public partial class MainWindow : Window
         this.SpringDonutWithCones.IsChecked = true;
     }
 
-    public void SetModels(params ModelVisual3D[] WorldModels)
+    public void SetModels(params List<ModelVisual3D> WorldModels)
     {
+        WorldModels.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(1, 0, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Indigo));
+        WorldModels.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 1, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Lime));
+        WorldModels.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 0, 1), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Orchid));
+
         viewPort.Children.Clear();
+        
         foreach (var model in WorldModels)
         {
             viewPort.Children.Add(model);
         }
+
         viewPort.MouseEnter += Vp_MouseEnter;
         viewPort.MouseLeave += Vp_MouseLeave;
     }
@@ -215,7 +222,7 @@ public partial class MainWindow : Window
         else if (sender == this.Donut)
         {
             SetModels(
-                SpringBuilder.BuildDonutMeshGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Blue)
+                SpringBuilder.BuildDonutGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Green)
             );
         }
         else if (sender == this.Spring)
@@ -248,8 +255,12 @@ public partial class MainWindow : Window
                 SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 64, 64).Render(Camera.Position, Camera.LookDirection, Brushes.Red),
                 SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 8, 30, (200, 64)).Render(Camera.Position, Camera.LookDirection, Brushes.Orange),
                 SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 64, (50, 32), (400, 64)).Render(Camera.Position, Camera.LookDirection, Brushes.Blue),
-                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 30, (50, 48), (100, 36), (800, 24)).Render(Camera.Position, Camera.LookDirection, Brushes.Green),
-                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 30, (50, 24), (200, 12), (400, 24), (2000, 18)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 30, (50, 48), (100, 36), (800, 24)).Render(Camera.Position, Camera.LookDirection, Brushes.Green)
+            );
+        }else if(sender == this.FinalSpringDonut)
+        {
+            SetModels(
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 2, 30, (50, 24), (100, 12), (1000, 12), (2000, 18)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
             );
         }
     }
