@@ -322,7 +322,7 @@ public static class SpringBuilder
         }
     }
 
-    public static MeshGeometry3D BuildSpringDonutWithCubesGeometry3D(double SR = 1000, int SR_rings = 48, double R = 100, int R_rings = 120, double r = 2, double ratio = 8)
+    public static MeshGeometry3D BuildSpringDonutWithCubesGeometry3D(double SR = 500, int SR_rings = 24, double R = 200, int R_rings = 30, double r = 2, double ratio = 16)
     {
         var Geometry = new MeshGeometry3D();
 
@@ -364,7 +364,7 @@ public static class SpringBuilder
     }
 
 
-    public static MeshGeometry3D BuildSpringDonutGeometry3D(double SR = 1000, int SR_rings = 48, double R = 100, int R_rings = 120, double r = 2, int splits = 30)
+    public static MeshGeometry3D BuildSpringDonutGeometry3D(double SR = 500, int SR_rings = 48, double R = 100, int R_rings = 120, double r = 10, int splits = 30)
     {
         var Geometry = new MeshGeometry3D();
 
@@ -403,47 +403,9 @@ public static class SpringBuilder
         }
 
 
-        BuildRingIndices(Geometry.TriangleIndices, SR_rings * R_rings, splits, true, false);
+        BuildRingIndices(Geometry.TriangleIndices, SR_rings * R_rings, splits, true, true);
 
         return Geometry;
-    }
-
-
-    public static bool IncrementWithCarryAt<T>(T[] limits, T[] values, int digit_position = 0)
-    where T : struct, IIncrementOperators<T>, IComparisonOperators<T, T, bool>
-    {
-        var carry = false;
-        if (values.Length == limits.Length && limits.Length > 0 && digit_position < limits.Length)
-        {
-            if ((++values[digit_position]) >= limits[digit_position])
-            {
-                carry = true;
-                values[digit_position] = default;
-                if (digit_position + 1 < limits.Length)
-                {
-                    carry = IncrementWithCarryAt(limits, values, digit_position + 1);
-                }
-            }
-        }
-        return carry;
-    }
-    public static bool IncrementWithCarry<T>(T[] limits, T[] values)
-        where T : struct, IIncrementOperators<T>, IComparisonOperators<T, T, bool>
-    {
-        var carry = IncrementWithCarryAt(limits, values);
-        return carry && values.All(v => v == default);
-    }
-    public static void IncrementAll<T>(T[] limits, T[] values)
-        where T : struct, IIncrementOperators<T>, IComparisonOperators<T, T, bool>
-    {
-        if (values.Length == limits.Length && limits.Length > 0)
-        {
-            for (int i = 0; i < limits.Length; i++)
-            {
-                if (++values[i] >= limits[i])
-                    values[i] = default;
-            }
-        }
     }
 
 
@@ -463,13 +425,11 @@ public static class SpringBuilder
     public static void IncrementAngles(AxisAngleRotation3D[] rotations, double[] deltas)
     {
         for (var i = 0; i < Math.Min(rotations.Length,deltas.Length); i++)
-        {
             rotations[i].Angle += deltas[i];
-        }
     }
 
 
-    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D(double GR = 1000, int GR_rings = 24, double SR = 200, int SR_rings = 48, double R = 50, int R_rings = 120, double r = 4, int splits = 30)
+    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D(double GR = 1000, int GR_rings = 24, double SR = 200, int SR_rings = 48, double R = 50, int R_rings = 120, double r = 10, int splits = 30)
     {
         var Geometry = new MeshGeometry3D();
 
@@ -529,7 +489,7 @@ public static class SpringBuilder
         return Geometry;
     }
 
-    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D2(double GR = 1000, int GR_rings = 24, double SR = 200, int SR_rings = 48, double R = 50, int R_rings = 120, double r = 4, int splits = 30)
+    public static MeshGeometry3D BuildMultiSpringDonutGeometry3D2(double GR = 1000, int GR_rings = 48, double SR = 200, int SR_rings = 48, double R = 50, int R_rings = 120, double r = 4, int splits = 30)
     {
         var Geometry = new MeshGeometry3D();
 
@@ -537,7 +497,7 @@ public static class SpringBuilder
 
         var R_rotation = new AxisAngleRotation3D(y_axis, 0);
         var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
-        var R_translate_transform = new TranslateTransform3D(R, 0, 0);
+        var R_translate_transform = new TranslateTransform3D(0, 0, R);
 
         var SR_rotation = new AxisAngleRotation3D(z_axis, 0);
         var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
@@ -546,6 +506,9 @@ public static class SpringBuilder
         var GR_rotation = new AxisAngleRotation3D(x_axis, 0);
         var GR_rotation_transform = new RotateTransform3D(GR_rotation, origin);
         var GR_translate_transform = new TranslateTransform3D(0, GR, 0);
+
+        var final_rotation = new AxisAngleRotation3D(y_axis, 90);
+        var final_rotation_transform = new RotateTransform3D(final_rotation, origin);
 
         AxisAngleRotation3D[] rotations = [R_rotation, SR_rotation, GR_rotation];
 
@@ -556,6 +519,10 @@ public static class SpringBuilder
         transform_group.Children.Add(SR_rotation_transform);
         transform_group.Children.Add(GR_translate_transform);
         transform_group.Children.Add(GR_rotation_transform);
+        transform_group.Children.Add(GR_rotation_transform);
+
+        transform_group.Children.Add(final_rotation_transform);
+
 
         int[] limits = [R_rings, SR_rings, GR_rings];
         var steps = new int[limits.Length];
@@ -570,10 +537,11 @@ public static class SpringBuilder
 
             var end = transform_group.Transform(origin);
 
-            BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
+            BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, 1, 16);
+            //BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 
-        BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
+        //BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
 
         return Geometry;
     }
