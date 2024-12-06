@@ -25,7 +25,7 @@ public partial class MainWindow : Window
         };
         viewPort.Camera = Camera;
 
-        this.SpringDonutWithCubes.IsChecked = true;
+        this.SpringDonutWithCones.IsChecked = true;
     }
 
     public void SetModels(params ModelVisual3D[] WorldModels)
@@ -209,48 +209,54 @@ public partial class MainWindow : Window
         if (sender == this.Cylinder)
         {
             SetModels(
-                SpringBuilder.BuildCylinderGeometry3D(new Point3D(0, 0, 0), new Point3D(0, 0, 100), 100, 10, 360).Render(Camera.Position,Camera.LookDirection)
+                SpringBuilder.BuildCylinderGeometry3D(new Point3D(), new Point3D(0, 0, 100), 100, 10, 360).Render(Camera.Position, Camera.LookDirection, Brushes.Aqua)
             );
         }
         else if (sender == this.Donut)
         {
             SetModels(
-                SpringBuilder.BuildDonutMeshGeometry3D().Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildDonutMeshGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Blue)
             );
         }
         else if (sender == this.Spring)
         {
             SetModels(
-                SpringBuilder.BuildSpringGeometry3D().Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildSpringGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Brown)
             );
         }
         else if (sender == this.SpringDonut)
         {
             SetModels(
-                SpringBuilder.BuildSpringDonutGeometry3D().Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildSpringDonutGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Chocolate)
                 );
         }
-        else if(sender == this.SpringDonutWithCubes)
+        else if (sender == this.SpringDonutWithCones)
         {
             SetModels(
-                SpringBuilder.BuildSpringDonutWithCubesGeometry3D().Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildSpringDonutWithConesGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.CadetBlue)
             );
-        }else if(sender == this.MultiSpringDonut)
+        }
+        else if (sender == this.MultiSpringDonut)
         {
             SetModels(
-                SpringBuilder.BuildMultiSpringDonutGeometry3D().Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildMultiSpringDonutGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Cyan)
             );
         }
         else if (sender == this.SuperMultiSpringDonut)
         {
             SetModels(
-                SpringBuilder.BuildSuperMultiSpringDonutGeometry3D().Render(Camera.Position, Camera.LookDirection)
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 64, 64).Render(Camera.Position, Camera.LookDirection, Brushes.Red),
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 8, 30, (200, 64)).Render(Camera.Position, Camera.LookDirection, Brushes.Orange),
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 64, (50, 32), (400, 64)).Render(Camera.Position, Camera.LookDirection, Brushes.Blue),
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 30, (50, 48), (100, 36), (800, 24)).Render(Camera.Position, Camera.LookDirection, Brushes.Green),
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 4, 30, (50, 24), (200, 12), (400, 24), (2000, 18)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
             );
         }
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        RadioButton_Click(this.SpringDonutWithCubes, new RoutedEventArgs());
+        this.WindowState = WindowState.Maximized;
+        RadioButton_Click(this.SpringDonutWithCones, new RoutedEventArgs());
     }
 }

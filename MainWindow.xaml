@@ -7,14 +7,14 @@
     <Grid x:Name="lay" Background="Azure"  MouseWheel="VP_MouseWheel" AllowDrop="true">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition Width="80pt"/>
+            <ColumnDefinition Width="140pt"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="1">
+        <StackPanel Grid.Column="1" Margin="0,10,0,0">
             <RadioButton x:Name="Cylinder" Click="RadioButton_Click">Cylinder</RadioButton>
             <RadioButton x:Name="Donut" Click="RadioButton_Click">Donut</RadioButton>
             <RadioButton x:Name="Spring" Click="RadioButton_Click">Spring</RadioButton>
             <RadioButton x:Name="SpringDonut" Click="RadioButton_Click">SpringDonut</RadioButton>
-            <RadioButton x:Name="SpringDonutWithCubes" Click="RadioButton_Click">SpringDonutWithCubes</RadioButton>
+            <RadioButton x:Name="SpringDonutWithCones" Click="RadioButton_Click">SpringDonutWithCubes</RadioButton>
             <RadioButton x:Name="MultiSpringDonut" Click="RadioButton_Click">MultiSpringDonut</RadioButton>
             <RadioButton x:Name="SuperMultiSpringDonut" Click="RadioButton_Click">SuperMultiSpringDonut</RadioButton>
         </StackPanel>
