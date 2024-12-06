@@ -1,45 +1,36 @@
-﻿using System;
-
-namespace GraphAlgorithmTester.Colors;
+﻿namespace CS3DSpring.Colors;
 
 /// <summary>
 /// Structure to define YUV.
 /// </summary>
-public struct YUV
+/// <remarks>
+/// Creates an instance of a YUV structure.
+/// </remarks>
+public struct YUV(double y, double u, double v)
 {
     /// <summary>
     /// Gets an empty YUV structure.
     /// </summary>
-    public static readonly YUV Empty = new YUV();
+    public static readonly YUV Empty = new();
 
-    private double y;
-    private double u;
-    private double v;
+    private double y = (y > 1) ? 1 : ((y < 0) ? 0 : y);
+    private double u = (u > 0.436) ? 0.436 : ((u < -0.436) ? -0.436 : u);
+    private double v = (v > 0.615) ? 0.615 : ((v < -0.615) ? -0.615 : v);
 
-    public static bool operator ==(YUV item1, YUV item2)
-    {
-        return (
+    public static bool operator ==(YUV item1, YUV item2) => 
             item1.Y == item2.Y
             && item1.U == item2.U
             && item1.V == item2.V
-            );
-    }
+            ;
 
-    public static bool operator !=(YUV item1, YUV item2)
-    {
-        return (
-            item1.Y != item2.Y
+    public static bool operator !=(YUV item1, YUV item2) => item1.Y != item2.Y
             || item1.U != item2.U
             || item1.V != item2.V
-            );
-    }
+            ;
 
     public double Y
     {
-        get
-        {
-            return y;
-        }
+        readonly get => y;
         set
         {
             y = value;
@@ -49,10 +40,8 @@ public struct YUV
 
     public double U
     {
-        get
-        {
-            return u;
-        }
+        readonly get => u;
+
         set
         {
             u = value;
@@ -62,10 +51,7 @@ public struct YUV
 
     public double V
     {
-        get
-        {
-            return v;
-        }
+        readonly get => v;
         set
         {
             v = value;
@@ -73,26 +59,8 @@ public struct YUV
         }
     }
 
-    /// <summary>
-    /// Creates an instance of a YUV structure.
-    /// </summary>
-    public YUV(double y, double u, double v)
-    {
-        this.y = (y > 1) ? 1 : ((y < 0) ? 0 : y);
-        this.u = (u > 0.436) ? 0.436 : ((u < -0.436) ? -0.436 : u);
-        this.v = (v > 0.615) ? 0.615 : ((v < -0.615) ? -0.615 : v);
-    }
+    public override readonly bool Equals(object? obj) => obj != null && GetType() == obj.GetType() && this == (YUV)obj;
 
-    public override bool Equals(Object obj)
-    {
-        if (obj == null || GetType() != obj.GetType()) return false;
-
-        return (this == (YUV)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Y.GetHashCode() ^ U.GetHashCode() ^ V.GetHashCode();
-    }
+    public override readonly int GetHashCode() => Y.GetHashCode() ^ U.GetHashCode() ^ V.GetHashCode();
 
 }

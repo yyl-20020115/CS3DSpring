@@ -1,48 +1,38 @@
-﻿using System;
-
-namespace GraphAlgorithmTester.Colors;
+﻿namespace CS3DSpring.Colors;
 
 /// <summary>
 /// Structure to define CMYK.
 /// </summary>
-public struct CMYK
+/// <remarks>
+/// Creates an instance of a CMYK structure.
+/// </remarks>
+public struct CMYK(double c, double m, double y, double k)
 {
     /// <summary>
     /// Gets an empty CMYK structure;
     /// </summary>
-    public readonly static CMYK Empty = new CMYK();
+    public readonly static CMYK Empty = new();
 
-    private double c;
-    private double m;
-    private double y;
-    private double k;
+    private double c = c;
+    private double m = m;
+    private double y = y;
+    private double k = k;
 
-    public static bool operator ==(CMYK item1, CMYK item2)
-    {
-        return (
-            item1.Cyan == item2.Cyan
+    public static bool operator ==(CMYK item1, CMYK item2) => item1.Cyan == item2.Cyan
             && item1.Magenta == item2.Magenta
             && item1.Yellow == item2.Yellow
             && item1.Black == item2.Black
-            );
-    }
+            ;
 
-    public static bool operator !=(CMYK item1, CMYK item2)
-    {
-        return (
-            item1.Cyan != item2.Cyan
+    public static bool operator !=(CMYK item1, CMYK item2) => item1.Cyan != item2.Cyan
             || item1.Magenta != item2.Magenta
             || item1.Yellow != item2.Yellow
             || item1.Black != item2.Black
-            );
-    }
+            ;
 
     public double Cyan
     {
-        get
-        {
-            return c;
-        }
+        readonly get => c;
         set
         {
             c = value;
@@ -52,10 +42,7 @@ public struct CMYK
 
     public double Magenta
     {
-        get
-        {
-            return m;
-        }
+        readonly get => m;
         set
         {
             m = value;
@@ -65,10 +52,7 @@ public struct CMYK
 
     public double Yellow
     {
-        get
-        {
-            return y;
-        }
+        readonly get => y;
         set
         {
             y = value;
@@ -78,10 +62,7 @@ public struct CMYK
 
     public double Black
     {
-        get
-        {
-            return k;
-        }
+        readonly get => k;
         set
         {
             k = value;
@@ -89,28 +70,10 @@ public struct CMYK
         }
     }
 
-    /// <summary>
-    /// Creates an instance of a CMYK structure.
-    /// </summary>
-    public CMYK(double c, double m, double y, double k)
-    {
-        this.c = c;
-        this.m = m;
-        this.y = y;
-        this.k = k;
-    }
+    public override readonly bool Equals(object? obj)
+        => obj != null && GetType() == obj.GetType() && this == (CMYK)obj;
 
-    public override bool Equals(Object obj)
-    {
-        if (obj == null || GetType() != obj.GetType()) return false;
-
-        return (this == (CMYK)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Cyan.GetHashCode() ^
+    public override int GetHashCode() => Cyan.GetHashCode() ^
           Magenta.GetHashCode() ^ Yellow.GetHashCode() ^ Black.GetHashCode();
-    }
 
 }

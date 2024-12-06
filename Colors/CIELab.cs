@@ -1,103 +1,45 @@
-﻿using System;
-
-namespace GraphAlgorithmTester.Colors;
+﻿namespace CS3DSpring.Colors;
 
 /// <summary>
 /// Structure to define CIE L*a*b*.
 /// </summary>
-public struct CIELab
+public struct CIELab(double l, double a, double b)
 {
     /// <summary>
     /// Gets an empty CIELab structure.
     /// </summary>
-    public static readonly CIELab Empty = new CIELab();
+    public static readonly CIELab Empty = new();
 
-    private double l;
-    private double a;
-    private double b;
-
-
-    public static bool operator ==(CIELab item1, CIELab item2)
-    {
-        return (
-            item1.L == item2.L
+    public static bool operator ==(CIELab item1, CIELab item2) => item1.L == item2.L
             && item1.A == item2.A
             && item1.B == item2.B
-            );
-    }
+            ;
 
-    public static bool operator !=(CIELab item1, CIELab item2)
-    {
-        return (
+    public static bool operator !=(CIELab item1, CIELab item2) => (
             item1.L != item2.L
             || item1.A != item2.A
             || item1.B != item2.B
             );
-    }
 
 
     /// <summary>
     /// Gets or sets L component.
     /// </summary>
-    public double L
-    {
-        get
-        {
-            return this.l;
-        }
-        set
-        {
-            this.l = value;
-        }
-    }
+    public double L { get; set; } = l;
 
     /// <summary>
     /// Gets or sets a component.
     /// </summary>
-    public double A
-    {
-        get
-        {
-            return this.a;
-        }
-        set
-        {
-            this.a = value;
-        }
-    }
+    public double A { get; set; } = a;
 
     /// <summary>
     /// Gets or sets a component.
     /// </summary>
-    public double B
-    {
-        get
-        {
-            return this.b;
-        }
-        set
-        {
-            this.b = value;
-        }
-    }
+    public double B { get; set; } = b;
 
-    public CIELab(double l, double a, double b)
-    {
-        this.l = l;
-        this.a = a;
-        this.b = b;
-    }
+    public override readonly bool Equals(object? obj) 
+        => obj != null && GetType() == obj.GetType() && this == (CIELab)obj;
 
-    public override bool Equals(Object obj)
-    {
-        if (obj == null || GetType() != obj.GetType()) return false;
-
-        return (this == (CIELab)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return L.GetHashCode() ^ a.GetHashCode() ^ b.GetHashCode();
-    }
+    public override readonly int GetHashCode() => L.GetHashCode() ^ A.GetHashCode() ^ B.GetHashCode();
 
 }

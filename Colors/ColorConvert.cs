@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace GraphAlgorithmTester.Colors;
+namespace CS3DSpring.Colors;
 
 public static class ColorConvert
 {
@@ -13,9 +13,9 @@ public static class ColorConvert
     public static HSB RGBtoHSB(int red, int green, int blue)
     {
         // normalize red, green and blue values
-        double r = ((double)red / 255.0);
-        double g = ((double)green / 255.0);
-        double b = ((double)blue / 255.0);
+        double r = (red / 255.0);
+        double g = (green / 255.0);
+        double b = (blue / 255.0);
 
         // conversion start
         double max = Math.Max(r, Math.Max(g, b));
@@ -54,9 +54,9 @@ public static class ColorConvert
         double h = 0, s = 0, l = 0;
 
         // normalize red, green, blue values
-        double r = (double)red / 255.0;
-        double g = (double)green / 255.0;
-        double b = (double)blue / 255.0;
+        double r = red / 255.0;
+        double g = green / 255.0;
+        double b = blue / 255.0;
 
         double max = Math.Max(r, Math.Max(g, b));
         double min = Math.Min(r, Math.Min(g, b));
@@ -120,14 +120,7 @@ public static class ColorConvert
 
         double k = (double)Math.Min(c, Math.Min(m, y));
 
-        if (k == 1.0)
-        {
-            return new CMYK(0, 0, 0, 1);
-        }
-        else
-        {
-            return new CMYK((c - k) / (1 - k), (m - k) / (1 - k), (y - k) / (1 - k), k);
-        }
+        return k == 1.0 ? new CMYK(0, 0, 0, 1) : new CMYK((c - k) / (1 - k), (m - k) / (1 - k), (y - k) / (1 - k), k);
     }
 
     /// <summary>
@@ -138,7 +131,7 @@ public static class ColorConvert
     /// <param name="blue">Blue must be in [0, 255].</param>
     public static YUV RGBtoYUV(int red, int green, int blue)
     {
-        YUV yuv = new YUV();
+        YUV yuv = new();
 
         // normalizes red, green, blue values
         double r = (double)red / 255.0;
@@ -158,10 +151,7 @@ public static class ColorConvert
     /// <param name="r">Red value.</param>
     /// <param name="g">Green value.</param>
     /// <param name="b">Blue value.</param>
-    public static string RGBToHex(int r, int g, int b)
-    {
-        return String.Format("#{0:x2}{1:x2}{2:x2}", r, g, b).ToUpper();
-    }
+    public static string RGBToHex(int r, int g, int b) => $"#{r:x2}{g:x2}{b:x2}".ToUpperInvariant();
     /// <summary>
     /// Converts RGB to CIE XYZ (CIE 1931 color space)
     /// </summary>
@@ -317,11 +307,12 @@ public static class ColorConvert
             double p = (2.0 * l) - q;
 
             double Hk = h / 360.0;
-            double[] T = new double[3];
-            T[0] = Hk + (1.0 / 3.0);    // Tr
-            T[1] = Hk;                // Tb
-            T[2] = Hk - (1.0 / 3.0);    // Tg
-
+            double[] T =
+            [
+                Hk + (1.0 / 3.0),    // Tr
+                Hk,                // Tb
+                Hk - (1.0 / 3.0),    // Tg
+            ];
             for (int i = 0; i < 3; i++)
             {
                 if (T[i] < 0) T[i] += 1.0;
@@ -408,7 +399,7 @@ public static class ColorConvert
     /// <param name="v">V must be in [-0.615, +0.615].</param>
     public static RGB YUVtoRGB(double y, double u, double v)
     {
-        RGB rgb = new RGB();
+        RGB rgb = new();
 
         rgb.Red = (int)((y + 1.139837398373983740 * v) * 255);
         rgb.Green = (int)((
@@ -458,11 +449,12 @@ public static class ColorConvert
     /// </summary>
     public static RGB XYZtoRGB(double x, double y, double z)
     {
-        double[] Clinear = new double[3];
-        Clinear[0] = x * 3.2410 - y * 1.5374 - z * 0.4986; // red
-        Clinear[1] = -x * 0.9692 + y * 1.8760 - z * 0.0416; // green
-        Clinear[2] = x * 0.0556 - y * 0.2040 + z * 1.0570; // blue
-
+        double[] Clinear =
+        [
+            x * 3.2410 - y * 1.5374 - z * 0.4986, // red
+            -x * 0.9692 + y * 1.8760 - z * 0.0416, // green
+            x * 0.0556 - y * 0.2040 + z * 1.0570, // blue
+        ];
         for (int i = 0; i < 3; i++)
         {
             Clinear[i] = (Clinear[i] <= 0.0031308) ? 12.92 * Clinear[i] : (
@@ -477,10 +469,7 @@ public static class ColorConvert
     /// <summary>
     /// XYZ to L*a*b* transformation function.
     /// </summary>
-    private static double Fxyz(double t)
-    {
-        return ((t > 0.008856) ? Math.Pow(t, (1.0 / 3.0)) : (7.787 * t + 16.0 / 116.0));
-    }
+    private static double Fxyz(double t) => (t > 0.008856) ? Math.Pow(t, 1.0 / 3.0) : ((7.787 * t) + (16.0 / 116.0));
 
     /// <summary>
     /// Converts CIEXYZ to CIELab.
@@ -536,7 +525,7 @@ public static class ColorConvert
         var xyz = LabtoXYZ(l, a, b);
         return XYZtoRGB(xyz.X, xyz.Y, xyz.Z);
     }
-    public static double MaxColorDistance = 764.83331517396653;
+    public const double MaxColorDistance = 764.83331517396653;
     /// <summary>
     /// Best formular as L*a*b works
     /// </summary>
@@ -552,14 +541,8 @@ public static class ColorConvert
         return Math.Sqrt((((512 + rmean) * r * r) >> 8) + 4 * g * g + (((767 - rmean) * b * b) >> 8))
             / MaxColorDistance;
     }
-    public static double GetColorValue(Color c)
-    {
-        return GetColorValue(new RGB(c.R, c.G, c.B));
-    }
-    public static double GetColorValue(RGB rgb)
-    {
-        return GetColorDistance(rgb,new RGB(0,0,0));    
-    }
+    public static double GetColorValue(Color c) => GetColorValue(new RGB(c.R, c.G, c.B));
+    public static double GetColorValue(RGB rgb) => GetColorDistance(rgb, new RGB(0, 0, 0));
     public static double GetColorDistance(Color c1,Color c2, double? MaxDistance = null)
     {
         MaxDistance ??= MaxColorDistance;
@@ -573,10 +556,10 @@ public static class ColorConvert
 
     public static void RangeTest()
     {
-        int[] values = new int[] { 0, 255 };
+        int[] values = [0, 255];
 
-        RGB e1 = new RGB();
-        RGB e2 = new RGB();
+        RGB e1 = new();
+        RGB e2 = new();
         var results = new List<double>();
 
         for (int i1 = 0; i1 < values.Length; i1++)

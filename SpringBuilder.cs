@@ -14,8 +14,6 @@ public static class SpringBuilder
     public static readonly Vector3D x_axis = new(1, 0, 0);
     public static readonly Vector3D y_axis = new(0, 1, 0);
     public static readonly Vector3D z_axis = new(0, 0, 1);
-    public static readonly Vector3D[] axes = [y_axis, z_axis, x_axis];
-    public static readonly Vector3D[] flip_axes = [y_axis, x_axis, z_axis, y_axis];
 
 
     public static double ToDegree(this double radian)
@@ -36,11 +34,11 @@ public static class SpringBuilder
             {
                 new AmbientLight
                 {
-                    Color = light ?? Colors.White,
+                    Color = light ?? System.Windows.Media.Colors.White,
                 },
-                new SpotLight(light ?? Colors.White, position??new Point3D(),direction??new Vector3D(),10,5)
+                //new SpotLight(light ?? Colors.White, position??new Point3D(),direction??new Vector3D(),10,5)
             };
-        var material = new DiffuseMaterial(brush) { AmbientColor = light ?? Colors.Gold };
+        var material = new DiffuseMaterial(brush) { AmbientColor = light ?? System.Windows.Media.Colors.White };
         collection.Add(new GeometryModel3D(geometry, material));
         group!.Children = collection;
         return model;
@@ -71,12 +69,12 @@ public static class SpringBuilder
         var Geometry = new MeshGeometry3D();
 
         BuildDonut(Geometry.Positions, center, R, r, splits);
-        BuildRingIndices(Geometry.TriangleIndices, splits, splits, true);
+        BuildRingIndices(Geometry.TriangleIndices, 0, splits, splits, true);
 
         return Geometry;
     }
 
-    public static void BuildRingIndices(Int32Collection indices, uint rings, uint splits, bool close, bool flip = false)
+    public static void BuildRingIndices(Int32Collection indices, uint _base, uint rings, uint splits, bool close, bool flip = false)
     {
         for (uint current_ring = 0; current_ring < (close ? rings : rings - 1); current_ring++)
         {
@@ -84,10 +82,10 @@ public static class SpringBuilder
             for (uint current_point = 0; current_point < splits; current_point++)
             {
                 uint next_point = (current_point + 1) % splits;
-                uint p0 = current_ring * splits + current_point;
-                uint p1 = current_ring * splits + next_point;
-                uint p2 = next_ring * splits + current_point;
-                uint p3 = next_ring * splits + next_point;
+                uint p0 = _base + current_ring * splits + current_point;
+                uint p1 = _base + current_ring * splits + next_point;
+                uint p2 = _base + next_ring * splits + current_point;
+                uint p3 = _base + next_ring * splits + next_point;
                 indices.Add((int)p1);
                 if (flip)
                 {
@@ -143,7 +141,7 @@ public static class SpringBuilder
         }
 
 
-        BuildRingIndices(Geometry.TriangleIndices, splits * Coils, splits, false);
+        BuildRingIndices(Geometry.TriangleIndices, 0, splits * Coils, splits, false);
         BuildCoverIndices(Geometry.Positions, Geometry.TriangleIndices, splits, R, z);
         return Geometry;
     }
@@ -172,14 +170,64 @@ public static class SpringBuilder
         }
     }
 
+
+    public static void BuildSphare(Point3DCollection positions, Int32Collection indices, Point3D center, double radius, uint stacks = 64, uint slices = 64, Vector3DCollection? normals = null, PointCollection? textures = null)
+    {
+        uint _base = (uint)positions.Count;
+        // Fill the vertices, normals, and textures collections.
+        for (uint stack = 0; stack <= stacks; stack++)
+        {
+            double phi = Math.PI / 2 - stack * Math.PI / stacks;
+            double y = radius * Math.Sin(phi);
+            double scale = -radius * Math.Cos(phi);
+
+            for (uint slice = 0; slice <= slices; slice++)
+            {
+                double theta = slice * 2 * Math.PI / slices;
+                double x = scale * Math.Sin(theta);
+                double z = scale * Math.Cos(theta);
+
+                var normal = new Vector3D(x, y, z);
+                normals?.Add(normal);
+                positions.Add(normal + center);
+                textures?.Add(new Point((double)slice / slices,
+                                      (double)stack / stacks));
+            }
+        }
+
+
+        // Fill the indices collection.
+        for (uint stack = 0; stack < stacks; stack++)
+        {
+            uint top = _base + (stack + 0) * (slices + 1);
+            uint bot = _base + (stack + 1) * (slices + 1);
+
+            for (uint slice = 0; slice < slices; slice++)
+            {
+                if (stack != 0)
+                {
+                    indices.Add((int)(top + slice));
+                    indices.Add((int)(bot + slice));
+                    indices.Add((int)(top + slice + 1));
+                }
+
+                if (stack != stacks - 1)
+                {
+                    indices.Add((int)(top + slice + 1));
+                    indices.Add((int)(bot + slice));
+                    indices.Add((int)(bot + slice + 1));
+                }
+            }
+        }
+    }
     public static MeshGeometry3D BuildCylinderGeometry3D(Point3D from, Point3D to, double radius, uint coils, uint splits)
     {
         var Geometry = new MeshGeometry3D();
 
         BuildCylinder(Geometry.Positions, from, to, radius, coils, splits);
         //make double sides
-        BuildRingIndices(Geometry.TriangleIndices, coils, splits, false, true);
-        BuildRingIndices(Geometry.TriangleIndices, coils, splits, false, false);
+        BuildRingIndices(Geometry.TriangleIndices, 0, coils, splits, false, true);
+        BuildRingIndices(Geometry.TriangleIndices, 0, coils, splits, false, false);
 
 
         return Geometry;
@@ -489,7 +537,7 @@ public static class SpringBuilder
         }
 
 
-        BuildRingIndices(Geometry.TriangleIndices, SR_rings * R_rings, splits, true, true);
+        BuildRingIndices(Geometry.TriangleIndices, 0, SR_rings * R_rings, splits, true, true);
 
         return Geometry;
     }
@@ -565,10 +613,14 @@ public static class SpringBuilder
             BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 
-        BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
+        BuildRingIndices(Geometry.TriangleIndices, 0, total, splits, true, false);
 
         return Geometry;
     }
+    public static readonly Vector3D[] axes = [y_axis, z_axis, x_axis];
+    public static readonly Vector3D[] flip_axes = [y_axis, z_axis, x_axis, y_axis];
+    public static Vector3D GetRotationAxis(uint i, bool flip)
+        => flip ? flip_axes[i % 4] : axes[i % 3];
 
     public static Vector3D GetOffset(uint i, double r, bool flip)
     {
@@ -576,10 +628,10 @@ public static class SpringBuilder
         {
             return (i % 4) switch
             {
-                0 => new Vector3D(0, r, 0),
-                1 => new Vector3D(0, r, 0),
-                2 => new Vector3D(r, 0, 0),
-                3 => new Vector3D(0, 0, r), //4d, no offset
+                0 => new Vector3D(0, 0, r),
+                1 => new Vector3D(r, 0, 0),
+                2 => new Vector3D(0, r, 0),
+                3 => new Vector3D(0, 0, r),
                 _ => new Vector3D()
             };
 
@@ -595,91 +647,10 @@ public static class SpringBuilder
             };
         }
     }
-    public static Vector3D GetRotationAxis(uint i, bool flip)
-        => flip ? flip_axes[i % 4] : axes[i % 3];
 
     public static Transform3D[] GenerateTransforms(uint i, double r, bool flip, out AxisAngleRotation3D rotation)
         => [new TranslateTransform3D(GetOffset(i, r,flip)),
             new RotateTransform3D(rotation = new AxisAngleRotation3D(GetRotationAxis(i,flip), 0), origin)];
-    public static MeshGeometry3D BuildSuperMultiSpringDonutGeometry3D(Point3D center, double MR = 4000, uint MR_rings = 24, double GR = 800, uint GR_rings = 24, double SR = 200, uint SR_rings = 24, double R = 50, uint R_rings = 30, double r = 4, uint splits = 15)
-    {
-        var Geometry = new MeshGeometry3D();
-
-        var transform_group = new Transform3DGroup();
-
-        var R_rotation = new AxisAngleRotation3D(y_axis, 0);
-        var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
-        var R_translate_transform = new TranslateTransform3D(0, 0, R);
-
-        var SR_rotation = new AxisAngleRotation3D(z_axis, 0);
-        var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
-        var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
-
-        var GR_rotation = new AxisAngleRotation3D(x_axis, 0);
-        var GR_rotation_transform = new RotateTransform3D(GR_rotation, origin);
-        var GR_translate_transform = new TranslateTransform3D(0, GR, 0);
-
-        var MR_rotation = new AxisAngleRotation3D(y_axis, 0);
-        var MR_rotation_transform = new RotateTransform3D(MR_rotation, origin);
-        var MR_translate_transform = new TranslateTransform3D(0, 0, MR);
-
-
-        List<AxisAngleRotation3D> rotations = [R_rotation, SR_rotation, GR_rotation, MR_rotation];
-
-        //定位点的操作是先局部后整体先移动后转动
-        transform_group.Children.Add(R_translate_transform);
-        transform_group.Children.Add(R_rotation_transform);
-
-        transform_group.Children.Add(SR_translate_transform);
-        transform_group.Children.Add(SR_rotation_transform);
-
-        transform_group.Children.Add(GR_translate_transform);
-        transform_group.Children.Add(GR_rotation_transform);
-
-        transform_group.Children.Add(MR_translate_transform);
-        transform_group.Children.Add(MR_rotation_transform);
-
-
-        transform_group.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(x_axis, 90), origin));
-        transform_group.Children.Add(new TranslateTransform3D((Vector3D)center));
-
-
-        uint[] limits = [R_rings, SR_rings, GR_rings, MR_rings];
-        var steps = new uint[limits.Length];
-        var deltas = BuildDeltas(limits, 360.0);
-        var total = limits.Aggregate(1U, (current, before) => current * before);
-
-
-        for (var n = 0; n < total; n++)
-        {
-            var start = transform_group.Transform(origin);
-
-            IncrementAngles(rotations, deltas);
-
-            var end = transform_group.Transform(origin);
-
-            BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
-        }
-
-        BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
-
-        return Geometry;
-    }
-
-
-    public static MeshGeometry3D BuildDepthSpringDonutGeometry3D(Point3D center, double R, uint depth, uint max_rings, double r = 4, uint splits = 12)
-    {
-        //0-4可以绘制，大于4的限制在4之内，
-        depth %= 4;
-        var r0 = Math.Pow(R, 1.0 / 4.0);
-        var d0 = max_rings >> 2;
-        List<(double, uint)> Rs = [];
-        for (uint i = 0; i < depth; i++)
-        {
-            Rs.Add((Math.Pow(r0, i + 1), d0 * (4 - i)));
-        }
-        return BuildUnlimitedSpringDonutGeometry3D(center, r, splits, [.. Rs]);
-    }
 
     public static MeshGeometry3D BuildUnlimitedSpringDonutGeometry3D(Point3D center, double r = 4, uint splits = 64, params (double radius, uint rings)[] Rs)
     {
@@ -724,59 +695,23 @@ public static class SpringBuilder
             BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 
-        BuildRingIndices(Geometry.TriangleIndices, total, splits, true, false);
+        BuildRingIndices(Geometry.TriangleIndices, 0, total, splits, true, false);
 
         return Geometry;
     }
 
-
-    public static void BuildSphare(Point3DCollection positions, Int32Collection indices, Point3D center, double radius, uint stacks = 64, uint slices = 64, Vector3DCollection? normals = null, PointCollection? textures = null)
+    public static MeshGeometry3D BuildDepthSpringDonutGeometry3D(Point3D center, double R, uint depth, uint max_rings, double r = 4, uint splits = 12)
     {
-        uint _base = (uint)positions.Count;
-        // Fill the vertices, normals, and textures collections.
-        for (uint stack = 0; stack <= stacks; stack++)
+        //0-4可以绘制，大于4的限制在4之内，
+        depth %= 4;
+        var r0 = Math.Pow(R, 1.0 / 4.0);
+        var d0 = max_rings >> 2;
+        List<(double, uint)> Rs = [];
+        for (uint i = 0; i < depth; i++)
         {
-            double phi = Math.PI / 2 - stack * Math.PI / stacks;
-            double y = radius * Math.Sin(phi);
-            double scale = -radius * Math.Cos(phi);
-
-            for (uint slice = 0; slice <= slices; slice++)
-            {
-                double theta = slice * 2 * Math.PI / slices;
-                double x = scale * Math.Sin(theta);
-                double z = scale * Math.Cos(theta);
-
-                var normal = new Vector3D(x, y, z);
-                normals?.Add(normal);
-                positions.Add(normal + center);
-                textures?.Add(new Point((double)slice / slices,
-                                      (double)stack / stacks));
-            }
+            Rs.Add((Math.Pow(r0, i + 1), d0 * (4 - i)));
         }
-
-
-        // Fill the indices collection.
-        for (uint stack = 0; stack < stacks; stack++)
-        {
-            uint top = _base + (stack + 0) * (slices + 1);
-            uint bot = _base + (stack + 1) * (slices + 1);
-
-            for (uint slice = 0; slice < slices; slice++)
-            {
-                if (stack != 0)
-                {
-                    indices.Add((int)(top + slice));
-                    indices.Add((int)(bot + slice));
-                    indices.Add((int)(top + slice + 1));
-                }
-
-                if (stack != stacks - 1)
-                {
-                    indices.Add((int)(top + slice + 1));
-                    indices.Add((int)(bot + slice));
-                    indices.Add((int)(bot + slice + 1));
-                }
-            }
-        }
+        return BuildUnlimitedSpringDonutGeometry3D(center, r, splits, [.. Rs]);
     }
+
 }

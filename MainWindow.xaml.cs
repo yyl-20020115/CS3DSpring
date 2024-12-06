@@ -56,7 +56,7 @@ public partial class MainWindow : Window
         var BlurRadius = new DropShadowEffect
         {
             BlurRadius = 20,
-            Color = Colors.Yellow,
+            Color = System.Windows.Media.Colors.Yellow,
             Direction = 0,
             Opacity = 1,
             ShadowDepth = 0
@@ -67,8 +67,6 @@ public partial class MainWindow : Window
 
     public HitTestResultBehavior HTResult(HitTestResult rawresult)
     {
-        //MessageBox.Show(rawresult.ToString());
-        // RayHitTestResult rayResult = rawresult as RayHitTestResult;
         if (rawresult is RayHitTestResult rayResult)
         {
             //RayMeshGeometry3DHitTestResult rayMeshResult = rayResult as RayMeshGeometry3DHitTestResult;
@@ -260,7 +258,7 @@ public partial class MainWindow : Window
         }else if(sender == this.FinalSpringDonut)
         {
             SetModels(
-                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 2, 30, (50, 24), (100, 12), (1000, 12), (2000, 18)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 2, 15, (50, 24), (100, 12), (200, 18), (1600, 18)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
             );
         }
     }
