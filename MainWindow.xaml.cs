@@ -1,5 +1,4 @@
-﻿using System.Timers;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -20,58 +19,23 @@ public partial class MainWindow : Window
         InitializeComponent();
         Camera = new PerspectiveCamera
         {
-            Position = new(0, 0, 3000),
+            Position = new(0, 0, 2000),
             LookDirection = new(0, 0, -1),
             FieldOfView = 1000
         };
         viewPort.Camera = Camera;
 
-        BuildModel(Spring.BuildSpringModelVisual3D());
+        SetModel(
+            SpringBuilder.BuildDonutMeshGeometry3D().Render()
+            );
     }
 
-    public void BuildModel(ModelVisual3D WorldModels)
+    public void SetModel(ModelVisual3D WorldModels)
     {
-        //光源
-        //AmbientLight （自然光）
-        //DirectionalLight （方向光）
-        //PointLight （点光源）
-        //SpotLight （聚光源）
-
-        //下面是调整n的位置，初学者可以先注释掉。
-        //var tt = new TranslateTransform3D
-        //{
-        //    OffsetX = 0,
-        //    OffsetZ = 0,
-        //    OffsetY = 0
-        //};
-        //var tr = new RotateTransform3D
-        //{
-        //    Rotation = new AxisAngleRotation3D(new Vector3D(1, 0, 0), 30)
-        //};
-
-        //var tr2 = new RotateTransform3D
-        //{
-        //    Rotation = new AxisAngleRotation3D(new Vector3D(0, 0, 1), 30)
-        //};
-
-        //var ts = new ScaleTransform3D
-        //{
-        //    ScaleX = 1.5,
-        //    ScaleY = 1.5,
-        //    ScaleZ = 1.6
-        //};
-        //var tg = new Transform3DGroup();
-        //tg.Children.Add(tr);
-        //tg.Children.Add(tr2);
-        //tg.Children.Add(tt);
-        //tg.Children.Add(ts);
-        //WorldModels.Transform = tg;
-        //将两个模型添加到场景中
+        viewPort.Children.Clear();
         viewPort.Children.Add(WorldModels);
-        //添加鼠标事件，用于显示隐藏光晕特效
         viewPort.MouseEnter += Vp_MouseEnter;
         viewPort.MouseLeave += Vp_MouseLeave;
-
     }
 
     private void Vp_MouseLeave(object sender, MouseEventArgs e)
@@ -149,7 +113,6 @@ public partial class MainWindow : Window
             {
                 //进行垂直旋转
                 VerticalTransform(mouseLastPosition.Y > newMousePosition.Y, MouseDeltaFactor);//垂直变换 
-
             }
 
             mouseLastPosition = newMousePosition;
@@ -237,5 +200,39 @@ public partial class MainWindow : Window
         }
         if (any)
             Camera.Position = p;
+    }
+
+    private void RadioButton_Click(object sender, RoutedEventArgs e)
+    {
+
+        if (sender == this.Donut)
+        {
+            SetModel(
+                SpringBuilder.BuildDonutMeshGeometry3D().Render()
+            );
+        }
+        else if (sender == this.Spring)
+        {
+            SetModel(
+                SpringBuilder.BuildSpringGeometry3D().Render()
+            );
+        }
+        else if (sender == this.DonutSpring)
+        {
+            SetModel(
+                SpringBuilder.BuildFailedDonutSpringGeometry3D().Render()
+                );
+        }
+        else if (sender == this.Cylinder)
+        {
+            SetModel(
+                SpringBuilder.BuildCylinderGeometry3D(new Point3D(0, 0, 0), new Point3D(0, 0, 100), 100, 10, 360).Render()
+            );
+        }else if(sender == this.Test)
+        {
+            SetModel(
+                SpringBuilder.BuildTestObjectGeometry3D().Render()
+            );
+        }
     }
 }

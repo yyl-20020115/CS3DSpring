@@ -5,7 +5,17 @@
         WindowStartupLocation="CenterScreen"
         Title="CS3DSpring" Height="440" Width="640">
     <Grid x:Name="lay" Background="Azure"  MouseWheel="VP_MouseWheel" AllowDrop="true">
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="80pt"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="1">
+            <RadioButton IsChecked="True" x:Name="Donut" Click="RadioButton_Click">Donut</RadioButton>
+            <RadioButton x:Name="Spring" Click="RadioButton_Click">Spring</RadioButton>
+            <RadioButton x:Name="DonutSpring" Click="RadioButton_Click">DonutSpring</RadioButton>
+            <RadioButton x:Name="Cylinder" Click="RadioButton_Click">Cylinder</RadioButton>
+            <RadioButton x:Name="Test" Click="RadioButton_Click">Test</RadioButton>
+        </StackPanel>
         <Viewport3D x:Name="viewPort"           
                     MouseLeftButtonDown="Vp_MouseLeftButtonDown" Margin="0,31,0.4,-0.2">
             <Viewport3D.Camera>
