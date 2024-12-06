@@ -3,18 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         MouseMove="Window_MouseMove" KeyDown="Window_KeyDown"
         WindowStartupLocation="CenterScreen"
-        Title="CS3DSpring" Height="440" Width="640">
+        Title="CS3DSpring" Height="600" Width="800" Loaded="Window_Loaded">
     <Grid x:Name="lay" Background="Azure"  MouseWheel="VP_MouseWheel" AllowDrop="true">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="80pt"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="1">
-            <RadioButton IsChecked="True" x:Name="Donut" Click="RadioButton_Click">Donut</RadioButton>
-            <RadioButton x:Name="Spring" Click="RadioButton_Click">Spring</RadioButton>
-            <RadioButton x:Name="DonutSpring" Click="RadioButton_Click">DonutSpring</RadioButton>
             <RadioButton x:Name="Cylinder" Click="RadioButton_Click">Cylinder</RadioButton>
-            <RadioButton x:Name="Test" Click="RadioButton_Click">Test</RadioButton>
+            <RadioButton x:Name="Donut" Click="RadioButton_Click">Donut</RadioButton>
+            <RadioButton x:Name="Spring" Click="RadioButton_Click">Spring</RadioButton>
+            <RadioButton x:Name="SpringDonut" Click="RadioButton_Click">SpringDonut</RadioButton>
+            <RadioButton x:Name="SpringDonutWithCubes" Click="RadioButton_Click">SpringDonutWithCubes</RadioButton>
+            <RadioButton x:Name="MultiSpringDonut" Click="RadioButton_Click">MultiSpringDonut</RadioButton>
         </StackPanel>
         <Viewport3D x:Name="viewPort"           
                     MouseLeftButtonDown="Vp_MouseLeftButtonDown" Margin="0,31,0.4,-0.2">

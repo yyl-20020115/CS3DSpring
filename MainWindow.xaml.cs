@@ -19,21 +19,22 @@ public partial class MainWindow : Window
         InitializeComponent();
         Camera = new PerspectiveCamera
         {
-            Position = new(0, 0, 2000),
+            Position = new(0, 0, 1500),
             LookDirection = new(0, 0, -1),
             FieldOfView = 1000
         };
         viewPort.Camera = Camera;
 
-        SetModel(
-            SpringBuilder.BuildDonutMeshGeometry3D().Render()
-            );
+        this.SpringDonutWithCubes.IsChecked = true;
     }
 
-    public void SetModel(ModelVisual3D WorldModels)
+    public void SetModels(params ModelVisual3D[] WorldModels)
     {
         viewPort.Children.Clear();
-        viewPort.Children.Add(WorldModels);
+        foreach (var model in WorldModels)
+        {
+            viewPort.Children.Add(model);
+        }
         viewPort.MouseEnter += Vp_MouseEnter;
         viewPort.MouseLeave += Vp_MouseLeave;
     }
@@ -205,34 +206,45 @@ public partial class MainWindow : Window
     private void RadioButton_Click(object sender, RoutedEventArgs e)
     {
 
-        if (sender == this.Donut)
+        if (sender == this.Cylinder)
         {
-            SetModel(
-                SpringBuilder.BuildDonutMeshGeometry3D().Render()
+            SetModels(
+                SpringBuilder.BuildCylinderGeometry3D(new Point3D(0, 0, 0), new Point3D(0, 0, 100), 100, 10, 360).Render(Camera.Position,Camera.LookDirection)
+            );
+        }
+        else if (sender == this.Donut)
+        {
+            SetModels(
+                SpringBuilder.BuildDonutMeshGeometry3D().Render(Camera.Position, Camera.LookDirection)
             );
         }
         else if (sender == this.Spring)
         {
-            SetModel(
-                SpringBuilder.BuildSpringGeometry3D().Render()
+            SetModels(
+                SpringBuilder.BuildSpringGeometry3D().Render(Camera.Position, Camera.LookDirection)
             );
         }
-        else if (sender == this.DonutSpring)
+        else if (sender == this.SpringDonut)
         {
-            SetModel(
-                SpringBuilder.BuildFailedDonutSpringGeometry3D().Render()
+            SetModels(
+                SpringBuilder.BuildSpringDonutGeometry3D().Render(Camera.Position, Camera.LookDirection)
                 );
         }
-        else if (sender == this.Cylinder)
+        else if(sender == this.SpringDonutWithCubes)
         {
-            SetModel(
-                SpringBuilder.BuildCylinderGeometry3D(new Point3D(0, 0, 0), new Point3D(0, 0, 100), 100, 10, 360).Render()
+            SetModels(
+                SpringBuilder.BuildSpringDonutWithCubesGeometry3D(1000).Render(Camera.Position, Camera.LookDirection)
             );
-        }else if(sender == this.Test)
+        }else if(sender == this.MultiSpringDonut)
         {
-            SetModel(
-                SpringBuilder.BuildTestObjectGeometry3D().Render()
+            SetModels(
+                SpringBuilder.BuildMultiSpringDonutGeometry3D2(1000).Render(Camera.Position, Camera.LookDirection)
             );
         }
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        RadioButton_Click(this.SpringDonut, new RoutedEventArgs());
     }
 }
