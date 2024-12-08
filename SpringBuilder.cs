@@ -618,7 +618,7 @@ public static class SpringBuilder
         return Geometry;
     }
     public static readonly Vector3D[] axes = [y_axis, z_axis, x_axis];
-    public static readonly Vector3D[] flip_axes = [y_axis, z_axis, x_axis, y_axis];
+    public static readonly Vector3D[] flip_axes = [y_axis, z_axis, x_axis, -y_axis];
     public static Vector3D GetRotationAxis(uint i, bool flip)
         => flip ? flip_axes[i % 4] : axes[i % 3];
 
@@ -683,8 +683,9 @@ public static class SpringBuilder
         var steps = new uint[limits.Length];
         var deltas = BuildDeltas(limits, 360.0);
         var total = limits.Aggregate(1U, (current, before) => current * before);
-
-        for (var n = 0; n < total; n++)
+       
+        uint n = 0;
+        for (; n < total; n++)
         {
             var start = transform_group.Transform(origin);
 
@@ -695,7 +696,7 @@ public static class SpringBuilder
             BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 
-        BuildRingIndices(Geometry.TriangleIndices, 0, total, splits, true, false);
+        BuildRingIndices(Geometry.TriangleIndices, 0, n, splits, true, false);
 
         return Geometry;
     }

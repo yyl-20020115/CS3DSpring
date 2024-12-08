@@ -258,7 +258,7 @@ public partial class MainWindow : Window
         }else if(sender == this.FinalSpringDonut)
         {
             SetModels(
-                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 2, 15, (50, 24), (100, 12), (200, 18), (1600, 18)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
+                SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 2, 6, (20, 12), (100, 12), (200, 12), (1000, 12)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
             );
         }
     }
