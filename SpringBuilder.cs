@@ -556,7 +556,7 @@ public static class SpringBuilder
         return deltas;
     }
 
-    public static void IncrementAngles(List<AxisAngleRotation3D> rotations, double[] deltas)
+    public static void IncreaseAngles(List<AxisAngleRotation3D> rotations, double[] deltas)
     {
         for (var i = 0; i < Math.Min(rotations.Count, deltas.Length); i++)
             rotations[i].Angle += deltas[i];
@@ -605,7 +605,7 @@ public static class SpringBuilder
         {
             var start = transform_group.Transform(origin);
 
-            IncrementAngles(rotations, deltas);
+            IncreaseAngles(rotations, deltas);
 
             var end = transform_group.Transform(origin);
 
@@ -689,7 +689,7 @@ public static class SpringBuilder
         {
             var start = transform_group.Transform(origin);
 
-            IncrementAngles(rotations, deltas);
+            IncreaseAngles(rotations, deltas);
 
             var end = transform_group.Transform(origin);
 
