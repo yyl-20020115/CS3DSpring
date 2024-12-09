@@ -617,7 +617,6 @@ public static class SpringBuilder
 
             var end = transform_group.Transform(origin);
 
-            //BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, 1, 16);
             BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 
@@ -630,31 +629,22 @@ public static class SpringBuilder
     public static Vector3D GetRotationAxis(uint i, bool flip)
         => flip ? flip_axes[i % 4] : axes[i % 3];
 
-    public static Vector3D GetOffset(uint i, double r, bool flip)
-    {
-        if (flip)
-        {
-            return (i % 4) switch
+    public static Vector3D GetOffset(uint i, double r, bool flip) => flip
+            ? (i % 4) switch
             {
                 0 => new Vector3D(0, 0, r),
                 1 => new Vector3D(r, 0, 0),
                 2 => new Vector3D(0, r, 0),
                 3 => new Vector3D(0, 0, r),
                 _ => new Vector3D()
-            };
-
-        }
-        else
-        {
-            return (i % 3) switch
+            }
+            : (i % 3) switch
             {
                 0 => new Vector3D(0, 0, r),
                 1 => new Vector3D(r, 0, 0),
                 2 => new Vector3D(0, r, 0),
                 _ => new Vector3D()
             };
-        }
-    }
 
     public static Transform3D[] GenerateTransforms(uint i, double r, bool flip, out AxisAngleRotation3D rotation)
         => [new TranslateTransform3D(GetOffset(i, r,flip)),
@@ -721,5 +711,4 @@ public static class SpringBuilder
         }
         return BuildUnlimitedSpringDonutGeometry3D(center, r, splits, [.. Rs]);
     }
-
 }
