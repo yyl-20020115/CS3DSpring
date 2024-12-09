@@ -556,10 +556,17 @@ public static class SpringBuilder
         return deltas;
     }
 
-    public static void IncreaseAngles(List<AxisAngleRotation3D> rotations, double[] deltas)
+    public static void IncreaseAngles(List<AxisAngleRotation3D> rotations, double[] deltas, uint[] indices, uint[] limits)
     {
         for (var i = 0; i < Math.Min(rotations.Count, deltas.Length); i++)
-            rotations[i].Angle += deltas[i];
+        {
+            ++indices[i];
+            if (indices[i] >= limits[i])
+            {
+                indices[i] = 0;
+            }
+            rotations[i].Angle += deltas[i];// * indices[i];
+        }
     }
 
 
@@ -597,6 +604,7 @@ public static class SpringBuilder
 
 
         uint[] limits = [R_rings, SR_rings, GR_rings];
+        uint[] indices = new uint[limits.Length];
         var steps = new uint[limits.Length];
         var deltas = BuildDeltas(limits, 360.0);
         var total = limits.Aggregate(1U, (current, before) => current * before);
@@ -605,7 +613,7 @@ public static class SpringBuilder
         {
             var start = transform_group.Transform(origin);
 
-            IncreaseAngles(rotations, deltas);
+            IncreaseAngles(rotations, deltas, indices, limits);
 
             var end = transform_group.Transform(origin);
 
@@ -679,17 +687,16 @@ public static class SpringBuilder
         transform_group.Children.Add(new TranslateTransform3D((Vector3D)center));
 
         var limits = Rs.Select(r => r.rings).ToArray();
-
-        var steps = new uint[limits.Length];
+        uint[] indices = new uint[limits.Length];
         var deltas = BuildDeltas(limits, 360.0);
         var total = limits.Aggregate(1U, (current, before) => current * before);
-       
+
         uint n = 0;
         for (; n < total; n++)
         {
             var start = transform_group.Transform(origin);
 
-            IncreaseAngles(rotations, deltas);
+            IncreaseAngles(rotations, deltas, indices, limits);
 
             var end = transform_group.Transform(origin);
 
