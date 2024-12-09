@@ -404,11 +404,11 @@ public static class SpringBuilder
             positions.Add(transform_group.Transform(point));
             spin_angle += spin_angle_delta;
             indices.Add(_base + 0);
-            indices.Add((int)(_base + i + 0));
-            indices.Add((int)(_base + i + 1));
+            indices.Add((int)(_base + 2 + (i + 0) % splits));
+            indices.Add((int)(_base + 2 + (i + 1) % splits));
             indices.Add(_base + 1);
-            indices.Add((int)(_base + i + 1));
-            indices.Add((int)(_base + i + 0));
+            indices.Add((int)(_base + 2 + (i + 1) % splits));
+            indices.Add((int)(_base + 2 + (i + 0) % splits));
         }
     }
 
