@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Media.Effects;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CS3DSpring;
 
@@ -29,15 +30,17 @@ public partial class MainWindow : Window
         this.SpringDonutWithCones.IsChecked = true;
     }
 
-    public void SetModels(params List<ModelVisual3D> WorldModels)
+    public void SetModels(params ModelVisual3D[] WorldModels)
     {
-        WorldModels.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(1, 0, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Indigo));
-        WorldModels.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 1, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Lime));
-        WorldModels.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 0, 1), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Orchid));
+        List<ModelVisual3D> list = [.. WorldModels];
+
+        list.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(1, 0, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Indigo));
+        list.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 1, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Lime));
+        list.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 0, 1), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Orchid));
 
         viewPort.Children.Clear();
         
-        foreach (var model in WorldModels)
+        foreach (var model in list)
         {
             viewPort.Children.Add(model);
         }
