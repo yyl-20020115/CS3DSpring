@@ -31,13 +31,13 @@ public static class SpringBuilder
         var model = new ModelVisual3D() { Content = new Model3DGroup() };
         var group = model.Content as Model3DGroup;
         var collection = new Model3DCollection
+        {
+            new AmbientLight
             {
-                new AmbientLight
-                {
-                    Color = light ?? System.Windows.Media.Colors.White,
-                },
-                //new SpotLight(light ?? Colors.White, position??new Point3D(),direction??new Vector3D(),10,5)
-            };
+                Color = light ?? System.Windows.Media.Colors.White,
+            },
+            //new SpotLight(light ?? Colors.White, position??new Point3D(),direction??new Vector3D(),10,5)
+        };
         var material = new DiffuseMaterial(brush) { AmbientColor = light ?? System.Windows.Media.Colors.White };
         collection.Add(new GeometryModel3D(geometry, material));
         group!.Children = collection;
@@ -161,7 +161,7 @@ public static class SpringBuilder
         }
     }
 
-    public static void BuildSphare(Point3DCollection positions, Int32Collection indices, Point3D center, double radius, uint stacks = 64, uint slices = 64, Vector3DCollection? normals = null, PointCollection? textures = null)
+    public static void BuildSphere(Point3DCollection positions, Int32Collection indices, Point3D center, double radius, uint stacks = 64, uint slices = 64, Vector3DCollection? normals = null, PointCollection? textures = null)
     {
         uint _base = (uint)positions.Count;
         // Fill the vertices, normals, and textures collections.
@@ -178,8 +178,7 @@ public static class SpringBuilder
                 var normal = new Vector3D(x, y, z);
                 normals?.Add(normal);
                 positions.Add(normal + center);
-                textures?.Add(new Point((double)slice / slices,
-                                      (double)stack / stacks));
+                textures?.Add(new Point((double)slice / slices, (double)stack / stacks));
             }
         }
 
@@ -291,6 +290,15 @@ public static class SpringBuilder
         BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, center, pointing, radius, length / radius);
         return Geometry;
     }
+
+    public static MeshGeometry3D BuildClosedCylinderGeometry3D(Point3D center, Vector3D pointing, double radius, double length)
+    {
+        var Geometry = new MeshGeometry3D();
+        BuildCylinderHelper(Geometry.Positions, Geometry.TriangleIndices, center, pointing, radius, length / radius);
+        return Geometry;
+    }
+
+
     public static void BuildCubeHelper(Point3DCollection positions, Int32Collection indices, Point3D from, Vector3D pointing, double radius = 1, double ratio = 8)
     {
         pointing.Normalize();
@@ -380,12 +388,66 @@ public static class SpringBuilder
         }
     }
 
+    public static void BuildCylinderHelper(Point3DCollection positions, Int32Collection indices, Point3D from, Vector3D pointing, double radius = 1, double ratio = 8, uint splits = 64)
+    {
+        pointing.Normalize();
+        var axis = GetPerpendicularDirection(z_axis, pointing);
+        var angle = GetIncludedAngle(z_axis, pointing).ToDegree();
+        var transform_group = new Transform3DGroup();
+        var rotation = new AxisAngleRotation3D(axis, angle);
+        var rotation_transform = new RotateTransform3D(rotation, origin);
+        var translate_transform = new TranslateTransform3D(from.X, from.Y, from.Z);
+
+        transform_group.Children.Add(rotation_transform);
+        transform_group.Children.Add(translate_transform);
+
+        var _base = positions.Count;
+        positions.Add(transform_group.Transform(new Point3D(0.0, 0.0, +radius * ratio / 2.0)));
+        positions.Add(transform_group.Transform(new Point3D(0.0, 0.0, -radius * ratio / 2.0)));
+
+        var spin_angle_delta = _2PI / splits;
+        var spin_angle = 0.0;
+        for (uint i = 0; i <= splits; i++)
+        {
+            var x = radius * Math.Cos(spin_angle);
+            var y = radius * Math.Sin(spin_angle);
+            var p0 = new Point3D(x, y, +radius * ratio / 2.0);
+            var p1 = new Point3D(x, y, -radius * ratio / 2.0);
+
+            positions.Add(transform_group.Transform(p0));
+            positions.Add(transform_group.Transform(p1));
+
+            spin_angle += spin_angle_delta;
+        }
+        for (uint i = 0; i <= splits; i++)
+        {
+            indices.Add(_base + 0);
+            indices.Add((int)(_base + 2 + (i * 2 + 0) % (2 * splits)));
+            indices.Add((int)(_base + 2 + (i * 2 + 2) % (2 * splits)));
+
+            indices.Add(_base + 1);
+            indices.Add((int)(_base + 2 + (i * 2 + 3) % (2 * splits)));
+            indices.Add((int)(_base + 2 + (i * 2 + 1) % (2 * splits)));
+
+            indices.Add((int)(_base + 2 + (i * 2 + 0) % (2 * splits)));
+            indices.Add((int)(_base + 2 + (i * 2 + 1) % (2 * splits)));
+            indices.Add((int)(_base + 2 + (i * 2 + 2) % (2 * splits)));
+
+            indices.Add((int)(_base + 2 + (i * 2 + 2) % (2 * splits)));
+            indices.Add((int)(_base + 2 + (i * 2 + 1) % (2 * splits)));
+            indices.Add((int)(_base + 2 + (i * 2 + 3) % (2 * splits)));
+
+
+        }
+    }
+
+
     public static MeshGeometry3D BuildSpringDonutWithCubesGeometry3D(Point3D center, double SR = 500, uint SR_rings = 24, double R = 200, uint R_rings = 30, double r = 2, double ratio = 16)
     {
         var Geometry = new MeshGeometry3D();
         var R_angle_step = 360.0 / R_rings;
         var SR_R_step_angle = 360.0 / (R_rings * SR_rings);
-        var transform_group = new Transform3DGroup();
+        var Transform_Group = new Transform3DGroup();
         var R_rotation = new AxisAngleRotation3D(y_axis, 0);
         var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
         var R_translate_transform = new TranslateTransform3D(R, 0, 0);
@@ -393,19 +455,19 @@ public static class SpringBuilder
         var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
         var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
         //定位点的操作是先局部后整体先移动后转动
-        transform_group.Children.Add(R_translate_transform);
-        transform_group.Children.Add(R_rotation_transform);
-        transform_group.Children.Add(SR_translate_transform);
-        transform_group.Children.Add(SR_rotation_transform);
-        transform_group.Children.Add(new TranslateTransform3D((Vector3D)center));
+        Transform_Group.Children.Add(R_translate_transform);
+        Transform_Group.Children.Add(R_rotation_transform);
+        Transform_Group.Children.Add(SR_translate_transform);
+        Transform_Group.Children.Add(SR_rotation_transform);
+        Transform_Group.Children.Add(new TranslateTransform3D((Vector3D)center));
         for (var j = 0; j < SR_rings; j++)
         {
             for (var i = 0; i < R_rings; i++)
             {
-                var start = transform_group.Transform(origin);
+                var start = Transform_Group.Transform(origin);
                 R_rotation.Angle += R_angle_step;
                 SR_rotation.Angle += SR_R_step_angle;
-                var end = transform_group.Transform(origin);
+                var end = Transform_Group.Transform(origin);
                 BuildCubeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, r, ratio);
             }
         }
@@ -418,7 +480,7 @@ public static class SpringBuilder
         var Geometry = new MeshGeometry3D();
         var R_angle_step = 360.0 / R_rings;
         var SR_R_step_angle = 360.0 / (R_rings * SR_rings);
-        var TransformGroup = new Transform3DGroup();
+        var Transform_Group = new Transform3DGroup();
         var R_rotation = new AxisAngleRotation3D(y_axis, 0);
         var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
         var R_translate_transform = new TranslateTransform3D(R, 0, 0);
@@ -427,20 +489,20 @@ public static class SpringBuilder
         var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
 
         //定位点的操作是先局部后整体先移动后转动
-        TransformGroup.Children.Add(R_translate_transform);
-        TransformGroup.Children.Add(R_rotation_transform);
-        TransformGroup.Children.Add(SR_translate_transform);
-        TransformGroup.Children.Add(SR_rotation_transform);
-        TransformGroup.Children.Add(new TranslateTransform3D((Vector3D)center));
+        Transform_Group.Children.Add(R_translate_transform);
+        Transform_Group.Children.Add(R_rotation_transform);
+        Transform_Group.Children.Add(SR_translate_transform);
+        Transform_Group.Children.Add(SR_rotation_transform);
+        Transform_Group.Children.Add(new TranslateTransform3D((Vector3D)center));
 
         for (var j = 0; j < SR_rings; j++)
         {
             for (var i = 0; i < R_rings; i++)
             {
-                var start = TransformGroup.Transform(origin);
+                var start = Transform_Group.Transform(origin);
                 R_rotation.Angle += R_angle_step;
                 SR_rotation.Angle += SR_R_step_angle;
-                var end = TransformGroup.Transform(origin);
+                var end = Transform_Group.Transform(origin);
                 BuildConeHelper(Geometry.Positions, Geometry.TriangleIndices, start, end - start, r, ratio);
             }
         }
@@ -454,7 +516,7 @@ public static class SpringBuilder
 
         var R_angle_step = 360.0 / R_rings;
         var SR_R_step_angle = 360.0 / (R_rings * SR_rings);
-        var TransformGroup = new Transform3DGroup();
+        var Transform_Group = new Transform3DGroup();
         var R_rotation = new AxisAngleRotation3D(y_axis, 0);
         var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
         var R_translate_transform = new TranslateTransform3D(R, 0, 0);
@@ -463,20 +525,20 @@ public static class SpringBuilder
         var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
 
         //定位点的操作是先局部后整体先移动后转动
-        TransformGroup.Children.Add(R_translate_transform);
-        TransformGroup.Children.Add(R_rotation_transform);
-        TransformGroup.Children.Add(SR_translate_transform);
-        TransformGroup.Children.Add(SR_rotation_transform);
-        TransformGroup.Children.Add(new TranslateTransform3D((Vector3D)center));
+        Transform_Group.Children.Add(R_translate_transform);
+        Transform_Group.Children.Add(R_rotation_transform);
+        Transform_Group.Children.Add(SR_translate_transform);
+        Transform_Group.Children.Add(SR_rotation_transform);
+        Transform_Group.Children.Add(new TranslateTransform3D((Vector3D)center));
 
         for (var j = 0; j < SR_rings; j++)
         {
             for (var i = 0; i < R_rings; i++)
             {
-                var start = TransformGroup.Transform(origin);
+                var start = Transform_Group.Transform(origin);
                 R_rotation.Angle += R_angle_step;
                 SR_rotation.Angle += SR_R_step_angle;
-                var end = TransformGroup.Transform(origin);
+                var end = Transform_Group.Transform(origin);
                 BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
             }
         }
@@ -509,7 +571,7 @@ public static class SpringBuilder
     public static MeshGeometry3D BuildMultiSpringDonutGeometry3D(Point3D center, double GR = 1000, uint GR_rings = 48, double SR = 200, uint SR_rings = 24, double R = 50, uint R_rings = 30, double r = 8, uint splits = 15)
     {
         var Geometry = new MeshGeometry3D();
-        var transform_group = new Transform3DGroup();
+        var Transform_Group = new Transform3DGroup();
         var R_rotation = new AxisAngleRotation3D(y_axis, 0);
         var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
         var R_translate_transform = new TranslateTransform3D(0, 0, R);
@@ -525,16 +587,16 @@ public static class SpringBuilder
         List<AxisAngleRotation3D> rotations = [R_rotation, SR_rotation, GR_rotation];
 
         //定位点的操作是先局部后整体先移动后转动
-        transform_group.Children.Add(R_translate_transform);
-        transform_group.Children.Add(R_rotation_transform);
-        transform_group.Children.Add(SR_translate_transform);
-        transform_group.Children.Add(SR_rotation_transform);
-        transform_group.Children.Add(GR_translate_transform);
-        transform_group.Children.Add(GR_rotation_transform);
-        transform_group.Children.Add(GR_rotation_transform);
+        Transform_Group.Children.Add(R_translate_transform);
+        Transform_Group.Children.Add(R_rotation_transform);
+        Transform_Group.Children.Add(SR_translate_transform);
+        Transform_Group.Children.Add(SR_rotation_transform);
+        Transform_Group.Children.Add(GR_translate_transform);
+        Transform_Group.Children.Add(GR_rotation_transform);
+        Transform_Group.Children.Add(GR_rotation_transform);
 
-        transform_group.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(y_axis, 90), origin));
-        transform_group.Children.Add(new TranslateTransform3D((Vector3D)center));
+        Transform_Group.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(y_axis, 90), origin));
+        Transform_Group.Children.Add(new TranslateTransform3D((Vector3D)center));
 
         uint[] limits = [R_rings, SR_rings, GR_rings];
         var steps = new uint[limits.Length];
@@ -542,9 +604,9 @@ public static class SpringBuilder
         var total = limits.Aggregate(1U, (current, before) => current * before);
         for (var n = 0; n < total; n++)
         {
-            var start = transform_group.Transform(origin);
+            var start = Transform_Group.Transform(origin);
             IncreaseAngles(rotations, deltas);
-            var end = transform_group.Transform(origin);
+            var end = Transform_Group.Transform(origin);
             BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
         BuildRingIndices(Geometry.TriangleIndices, 0, total, splits, true, false);
@@ -582,21 +644,21 @@ public static class SpringBuilder
         var Geometry = new MeshGeometry3D();
         if (Rs.Length == 0)
         {
-            BuildSphare(Geometry.Positions, Geometry.TriangleIndices, center, r, splits, splits);
+            BuildSphere(Geometry.Positions, Geometry.TriangleIndices, center, r, splits, splits);
             return Geometry;
         }
 
-        var transform_group = new Transform3DGroup();
-        var rotations = new List<AxisAngleRotation3D>();
+        var TransformGroup = new Transform3DGroup();
+        var Rotations = new List<AxisAngleRotation3D>();
         for (uint i = 0; i < Rs.Length; i++)
         {
             var transforms = GenerateTransforms(i, Rs[i].radius, Rs.Length >= 4, out var rotation);
-            rotations.Add(rotation);
-            transform_group.Children.Add(transforms[0]);
-            transform_group.Children.Add(transforms[1]);
+            Rotations.Add(rotation);
+            TransformGroup.Children.Add(transforms[0]);
+            TransformGroup.Children.Add(transforms[1]);
         }
 
-        transform_group.Children.Add(new TranslateTransform3D((Vector3D)center));
+        TransformGroup.Children.Add(new TranslateTransform3D((Vector3D)center));
 
         var limits = Rs.Select(r => r.rings).ToArray();
         var indices = new uint[limits.Length];
@@ -606,9 +668,9 @@ public static class SpringBuilder
         uint n = 0;
         for (; n < total; n++)
         {
-            var start = transform_group.Transform(origin);
-            IncreaseAngles(rotations, deltas);
-            var end = transform_group.Transform(origin);
+            var start = TransformGroup.Transform(origin);
+            IncreaseAngles(Rotations, deltas);
+            var end = TransformGroup.Transform(origin);
             BuildPointRingHelper(Geometry.Positions, start, end - start, r, splits);
         }
 

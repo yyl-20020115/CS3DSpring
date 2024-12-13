@@ -4,7 +4,6 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Media.Effects;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CS3DSpring;
 
@@ -17,7 +16,6 @@ public partial class MainWindow : Window
     private readonly PerspectiveCamera Camera;
     public MainWindow()
     {
-
         InitializeComponent();
         Camera = new PerspectiveCamera
         {
@@ -26,7 +24,6 @@ public partial class MainWindow : Window
             FieldOfView = 1000
         };
         viewPort.Camera = Camera;
-
         this.SpringDonutWithCones.IsChecked = true;
     }
 
@@ -34,9 +31,9 @@ public partial class MainWindow : Window
     {
         List<ModelVisual3D> list = [.. WorldModels];
 
-        list.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(1, 0, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Indigo));
-        list.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 1, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Lime));
-        list.Add(SpringBuilder.BuildCubeGeometry3D(new Point3D(), new Vector3D(0, 0, 1), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Orchid));
+        list.Add(SpringBuilder.BuildClosedCylinderGeometry3D(new Point3D(), new Vector3D(1, 0, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Indigo));
+        list.Add(SpringBuilder.BuildClosedCylinderGeometry3D(new Point3D(), new Vector3D(0, 1, 0), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Lime));
+        list.Add(SpringBuilder.BuildClosedCylinderGeometry3D(new Point3D(), new Vector3D(0, 0, 1), 1, 24000).Render(Camera.Position, Camera.LookDirection, Brushes.Orchid));
 
         viewPort.Children.Clear();
         
@@ -67,7 +64,6 @@ public partial class MainWindow : Window
         viewPort.Effect = BlurRadius;
     }
 
-
     public HitTestResultBehavior HTResult(HitTestResult rawresult)
     {
         if (rawresult is RayHitTestResult rayResult)
@@ -87,7 +83,7 @@ public partial class MainWindow : Window
     }
 
     //鼠标位置
-    System.Windows.Point mouseLastPosition;
+    private Point mouseLastPosition;
 
     private void Vp_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -271,4 +267,4 @@ public partial class MainWindow : Window
         this.WindowState = WindowState.Maximized;
         RadioButton_Click(this.SpringDonutWithCones, new RoutedEventArgs());
     }
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
