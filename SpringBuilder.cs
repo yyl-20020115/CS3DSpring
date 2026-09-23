@@ -697,24 +697,24 @@ public static class SpringBuilder
         //中心位置
         Point3D center,
         //大横环半径
-        double SR = 360,
+        double SR = 300,
         //SR_rings是整体含有环的个数
         uint SR_rings = 48,
         //小竖环半径
-        double R = 200,
+        double R = 200, 
         //R_rings 是每个竖环的分割数
-        uint R_rings = 360,
+        uint R_rings = 360, 
         //点半径
         double r = 0.4,
         //全部角度
-        double All_angles = 360.0 * 4,
+        double All_angles = 360.0*4,
         //竖环半径单步增长
         double R_length_step = 2.0,
         //split是点圆的分割数
         uint splits = 6)
     {
         var Geometry = new MeshGeometry3D();
-
+       
         var R_angle_step = All_angles / R_rings;
         var SR_R_step_angle = All_angles / (R_rings * SR_rings);
         var Transform_Group = new Transform3DGroup();
@@ -746,7 +746,7 @@ public static class SpringBuilder
                     Geometry.Positions, start, end - start, r, splits
                     );
             }
-            R_translate_transform.OffsetX += R_length_step * R_length_step;
+            R_translate_transform.OffsetX += R_length_step* R_length_step;
         }
 
         BuildRingIndices(Geometry.TriangleIndices, 0, SR_rings * R_rings, splits, true, true);
