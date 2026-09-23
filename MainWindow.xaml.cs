@@ -260,6 +260,12 @@ public partial class MainWindow : Window
                 SpringBuilder.BuildUnlimitedSpringDonutGeometry3D(new Point3D(), 2, 6, (20, 12), (100, 12), (200, 12), (1000, 12)).Render(Camera.Position, Camera.LookDirection, Brushes.DarkCyan)
             );
         }
+        else if (sender == this.Gravity)
+        {
+            SetModels(
+                SpringBuilder.BuildGravityGeometry3D(new Point3D()).Render(Camera.Position, Camera.LookDirection, Brushes.Chocolate)
+            );
+        }
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)

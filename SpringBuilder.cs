@@ -692,4 +692,65 @@ public static class SpringBuilder
         }
         return BuildUnlimitedSpringDonutGeometry3D(center, r, splits, [.. Rs]);
     }
+
+    public static MeshGeometry3D BuildGravityGeometry3D(
+        //中心位置
+        Point3D center,
+        //大横环半径
+        double SR = 360,
+        //SR_rings是整体含有环的个数
+        uint SR_rings = 48,
+        //小竖环半径
+        double R = 200,
+        //R_rings 是每个竖环的分割数
+        uint R_rings = 360,
+        //点半径
+        double r = 0.4,
+        //全部角度
+        double All_angles = 360.0 * 4,
+        //竖环半径单步增长
+        double R_length_step = 2.0,
+        //split是点圆的分割数
+        uint splits = 6)
+    {
+        var Geometry = new MeshGeometry3D();
+
+        var R_angle_step = All_angles / R_rings;
+        var SR_R_step_angle = All_angles / (R_rings * SR_rings);
+        var Transform_Group = new Transform3DGroup();
+        var R_rotation = new AxisAngleRotation3D(y_axis, 0);
+        var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
+        var R_translate_transform = new TranslateTransform3D(R, 0, 0);
+        var SR_rotation = new AxisAngleRotation3D(z_axis, 0);
+        var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
+        var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
+
+        //定位点的操作是先局部后整体先移动后转动
+        Transform_Group.Children.Add(R_translate_transform);
+        Transform_Group.Children.Add(R_rotation_transform);
+        Transform_Group.Children.Add(SR_translate_transform);
+        Transform_Group.Children.Add(SR_rotation_transform);
+        Transform_Group.Children.Add(new TranslateTransform3D((Vector3D)center));
+        //大环分成SR_rings个竖环
+        for (var j = 0; j < SR_rings; j++)
+        {
+            //每个竖环由R_rings个点构成
+            for (var i = 0; i < R_rings; i++)
+            {
+                var start = Transform_Group.Transform(origin);
+                R_rotation.Angle += R_angle_step;
+                SR_rotation.Angle += SR_R_step_angle;
+                var end = Transform_Group.Transform(origin);
+                //这个环实际上是点
+                BuildPointRingHelper(
+                    Geometry.Positions, start, end - start, r, splits
+                    );
+            }
+            R_translate_transform.OffsetX += R_length_step * R_length_step;
+        }
+
+        BuildRingIndices(Geometry.TriangleIndices, 0, SR_rings * R_rings, splits, true, true);
+        return Geometry;
+    }
+
 }
