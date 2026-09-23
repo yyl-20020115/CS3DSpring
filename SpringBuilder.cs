@@ -721,11 +721,13 @@ public static class SpringBuilder
         var R_rotation = new AxisAngleRotation3D(y_axis, 0);
         var R_rotation_transform = new RotateTransform3D(R_rotation, origin);
         var R_translate_transform = new TranslateTransform3D(R, 0, 0);
+        var R_scale_transform = new ScaleTransform3D(1.0, 0, 0);
         var SR_rotation = new AxisAngleRotation3D(z_axis, 0);
         var SR_rotation_transform = new RotateTransform3D(SR_rotation, origin);
         var SR_translate_transform = new TranslateTransform3D(SR, 0, 0);
 
         //定位点的操作是先局部后整体先移动后转动
+        //Transform_Group.Children.Add(R_scale_transform);
         Transform_Group.Children.Add(R_translate_transform);
         Transform_Group.Children.Add(R_rotation_transform);
         Transform_Group.Children.Add(SR_translate_transform);
